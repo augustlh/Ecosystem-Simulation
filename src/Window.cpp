@@ -42,18 +42,21 @@ Window::~Window()
 
 void Window::Renderer()
 {
-    for (int i = 0; i < (int)m_width; ++i)
-    {
-        for (int j = 0; j < (int)m_height; ++j)
-        {
-            SDL_SetRenderDrawColor(m_renderer, i % 255, j % 255, 0, 255);
-            SDL_RenderDrawPoint(m_renderer, i, j);
-        }
-    }
-    SDL_SetRenderDrawColor(m_renderer, 51, 77, 102, 255);
+    // for (int i = 0; i < (int)m_width; ++i)
+    // {
+    //     for (int j = 0; j < (int)m_height; ++j)
+    //     {
+    //         SDL_SetRenderDrawColor(m_renderer, i % 255, j % 255, 0, 255);
+    //         SDL_RenderDrawPoint(m_renderer, i, j);
+    //     }
+    // }
+    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
 
     for (int i = -10; i < 10; ++i)
+    {
         SDL_RenderDrawLine(m_renderer, i, 0, m_width + i, m_height);
+        SDL_RenderDrawLine(m_renderer, m_width + i, 0, 0 + i, m_height);
+    }
 
     SDL_RenderPresent(m_renderer);
 }
