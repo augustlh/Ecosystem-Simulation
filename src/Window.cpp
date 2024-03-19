@@ -27,7 +27,6 @@ namespace Ecosim
             return;
         }
 
-        std::cout << "SDL Renderer from Window: " << m_renderer << std::endl;
         Renderer::SetSDLRenderer(m_renderer);
     }
 

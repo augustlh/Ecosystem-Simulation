@@ -17,15 +17,16 @@ namespace Ecosim
     class Renderer
     {
     private:
-        static SDL_Renderer *m_sdl_renderer;
+        static SDL_Renderer *m_sdlRenderer;
 
     public:
-        static void SetSDLRenderer(SDL_Renderer *sdl_renderer);
+        static void SetSDLRenderer(SDL_Renderer *sdlRenderer);
 
         static void RenderFrame();
 
         static void Background(Color color);
         static void Circle(Vector2i center, int radius, Color color);
+        static void Line(Vector2i from, Vector2i to, Color color);
     };
 }
 

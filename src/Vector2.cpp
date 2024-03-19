@@ -9,4 +9,8 @@ namespace Ecosim
     Vector2i::Vector2i() : x(0), y(0) {}
     Vector2i::Vector2i(int _n) : x(_n), y(_n) {}
     Vector2i::Vector2i(int _x, int _y) : x(_x), y(_y) {}
+    Vector2i Vector2i::operator+(const Vector2i &other) const
+    {
+        return Vector2i(x + other.x, y + other.y);
+    }
 }

@@ -21,6 +21,8 @@ namespace Ecosim
         Vector2i();
         Vector2i(int _n);
         Vector2i(int _x, int _y);
+
+        Vector2i operator+(const Vector2i &other) const;
     };
 }
 
