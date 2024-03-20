@@ -18,12 +18,12 @@ namespace Ecosim
         SDL_RenderClear(Renderer::m_sdlRenderer);
     }
 
-    void Renderer::Circle(Vector2i center, int radius, Color color)
+    void Renderer::Circle(Vector2<int> center, int radius, Color color)
     {
         filledCircleRGBA(Renderer::m_sdlRenderer, (int16_t)center.x, (int16_t)center.y, (int16_t)radius, color.r, color.g, color.b, color.a);
     }
 
-    void Renderer::Line(Vector2i from, Vector2i to, Color color)
+    void Renderer::Line(Vector2<int> from, Vector2<int> to, Color color)
     {
         lineRGBA(Renderer::m_sdlRenderer, from.x, from.y, to.x, to.y, color.r, color.g, color.b, color.a);
     }

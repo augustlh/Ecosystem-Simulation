@@ -2,15 +2,15 @@
 
 namespace Ecosim
 {
-    Vector2::Vector2() : x(0.0f), y(0.0f) {}
-    Vector2::Vector2(float _n) : x(_n), y(_n) {}
-    Vector2::Vector2(float _x, float _y) : x(_x), y(_y) {}
+    template <typename T>
+    Vector2<T>::Vector2() : x(0), y(0) {}
 
-    Vector2i::Vector2i() : x(0), y(0) {}
-    Vector2i::Vector2i(int _n) : x(_n), y(_n) {}
-    Vector2i::Vector2i(int _x, int _y) : x(_x), y(_y) {}
-    Vector2i Vector2i::operator+(const Vector2i &other) const
-    {
-        return Vector2i(x + other.x, y + other.y);
-    }
+    template <typename T>
+    Vector2<T>::Vector2(T _n) : x(_n), y(_n) {}
+
+    template <typename T>
+    Vector2<T>::Vector2(T _x, T _y) : x(_x), y(_y) {}
+
+    template <typename T>
+    Vector2<T> Vector2<T>::operator+(const Vector2<T> &other) const { return Vector2<T>(x + other.x, y + other.y); }
 }

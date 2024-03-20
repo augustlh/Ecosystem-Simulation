@@ -10,8 +10,8 @@ class GreenRenderable : public Ecosim::Renderable, public Ecosim::Simulatable
 {
 private:
     Ecosim::Color m_color;
-    Ecosim::Vector2i m_center;
-    Ecosim::Vector2i m_velocity;
+    Ecosim::Vector2<int> m_center;
+    Ecosim::Vector2<int> m_velocity;
     int m_radius;
 
 public:
@@ -19,7 +19,7 @@ public:
 
     void Draw() override
     {
-        Ecosim::Vector2i direction(m_velocity.x * m_radius + 10, m_velocity.y * m_radius + 10);
+        Ecosim::Vector2<int> direction(m_velocity.x * m_radius + 10, m_velocity.y * m_radius + 10);
         Ecosim::Renderer::Line(m_center, m_center + direction, m_color);
         Ecosim::Renderer::Circle(m_center, m_radius, m_color);
     }
@@ -38,8 +38,8 @@ class RedRenderable : public Ecosim::Renderable, public Ecosim::Simulatable
 {
 private:
     Ecosim::Color m_color;
-    Ecosim::Vector2i m_center;
-    Ecosim::Vector2i m_velocity;
+    Ecosim::Vector2<int> m_center;
+    Ecosim::Vector2<int> m_velocity;
     int m_radius;
 
 public:
@@ -47,7 +47,7 @@ public:
 
     void Draw() override
     {
-        Ecosim::Vector2i direction(m_velocity.x * m_radius + 10, m_velocity.y * m_radius + 10);
+        Ecosim::Vector2<int> direction(m_velocity.x * m_radius + 10, m_velocity.y * m_radius + 10);
         Ecosim::Renderer::Line(m_center, m_center + direction, m_color);
         Ecosim::Renderer::Circle(m_center, m_radius, m_color);
     }

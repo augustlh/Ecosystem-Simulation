@@ -25,8 +25,8 @@ namespace Ecosim
         static void RenderFrame();
 
         static void Background(Color color);
-        static void Circle(Vector2i center, int radius, Color color);
-        static void Line(Vector2i from, Vector2i to, Color color);
+        static void Circle(Vector2<int> center, int radius, Color color);
+        static void Line(Vector2<int> from, Vector2<int> to, Color color);
     };
 }
 
