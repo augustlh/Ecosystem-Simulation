@@ -1,5 +1,5 @@
 TARGET := out/Main.exe
-OBJS := out/Main.o out/Window.o out/Renderer.o out/Vector2.o
+OBJS := out/Main.o out/Window.o out/Renderer.o out/Vector2.o out/Map.o
 
 C_FLAGS := -Wall -g
 INCLUDE := -Isrc/include -Iinclude

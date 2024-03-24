@@ -12,6 +12,18 @@ namespace Ecosim
         SDL_RenderPresent(Renderer::m_sdlRenderer);
     }
 
+    SDL_Surface *Renderer::RequestSDLSurface(Vector2<int> size) { return RequestSDLSurface(size.x, size.y); }
+
+    SDL_Surface *Renderer::RequestSDLSurface(int width, int height)
+    {
+        return SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+    }
+
+    SDL_Texture *Renderer::BakeTexture(SDL_Surface *surface)
+    {
+        return SDL_CreateTextureFromSurface(m_sdlRenderer, surface);
+    }
+
     void Renderer::Background(Color color)
     {
         SDL_SetRenderDrawColor(Renderer::m_sdlRenderer, color.r, color.g, color.b, color.a);
@@ -26,5 +38,13 @@ namespace Ecosim
     void Renderer::Line(Vector2<int> from, Vector2<int> to, Color color)
     {
         lineRGBA(Renderer::m_sdlRenderer, from.x, from.y, to.x, to.y, color.r, color.g, color.b, color.a);
+    }
+
+    void Renderer::Texture(SDL_Texture *texture, Vector2<int> pos)
+    {
+        int textureWidth, textureHeight;
+        SDL_QueryTexture(texture, NULL, NULL, &textureWidth, &textureHeight);
+        SDL_Rect destination = {.x = pos.x, .y = pos.y, .w = textureWidth, .h = textureHeight};
+        SDL_RenderCopy(m_sdlRenderer, texture, NULL, &destination);
     }
 }

@@ -5,6 +5,7 @@
 #include "Window.h"
 #include "Renderer.h"
 #include "Interfaces.h"
+#include "Map.h"
 
 class GreenRenderable : public Ecosim::Renderable, public Ecosim::Simulatable
 {
@@ -82,6 +83,8 @@ int main(int argc, char *args[])
     SDL_Event sdlEvent;
     bool shouldClose = false;
 
+    Ecosim::Map map;
+
     while (!shouldClose)
     {
         while (SDL_PollEvent(&sdlEvent))
@@ -97,6 +100,8 @@ int main(int argc, char *args[])
 
         for (const auto &renderable : renderables)
             renderable->Draw();
+
+        map.Render();
 
         Ecosim::Renderer::RenderFrame();
     }
