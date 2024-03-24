@@ -1,0 +1,13 @@
+generation:
+    seed: 100
+    smoothness: 0.002
+    water-level: 0.75
+    map-width: 800
+    map-height: 800
+biomes:
+    - name: grassy
+      color: [0, 255, 0]
+    - name: rocky
+      color: [100, 100, 100]
+    - name: foresty
+      color: [0, 100, 0]

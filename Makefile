@@ -1,5 +1,6 @@
 TARGET := out/Main.exe
-OBJS := out/Main.o out/Window.o out/Renderer.o out/Vector2.o out/Map.o
+YAML_TARGET := out/Yaml.o
+OBJS := out/Main.o out/Window.o out/Renderer.o out/Vector2.o out/Map.o $(YAML_TARGET)
 
 C_FLAGS := -Wall -g
 INCLUDE := -Isrc/include -Iinclude
@@ -10,25 +11,28 @@ else
 	LIBRARIES := -lSDL2 -lSDL2_gfx
 endif
 
+
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	g++ $(C_FLAGS) $(INCLUDE) -o $@ $^ $(LIBRARIES)
 
+$(YAML_TARGET): src/include/yaml/Yaml.cpp
+	g++ $(C_FLAGS) -c -o $@ $^
+
 out/%.o: src/%.cpp
 	g++ $(C_FLAGS) $(INCLUDE) -c -o $@ $^
 
-ifeq ($(OS),Windows_NT)
 
+
+ifeq ($(OS),Windows_NT)
 run: $(TARGET)
 	call out\Main.exe
-
 else
-
 run: $(TARGET)
 	$(TARGET)
 
 clean:
 	rm -f out/*
-
 endif

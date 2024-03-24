@@ -65,7 +65,7 @@ public:
 
 int main(int argc, char *args[])
 {
-    Ecosim::Window win("Ecosim", 400, 400);
+    Ecosim::Window win("Ecosim", 800, 800);
 
     Ecosim::Color backgroundColor = {.r = 43, .g = 38, .b = 66, .a = 255};
 
@@ -96,12 +96,11 @@ int main(int argc, char *args[])
         for (const auto &simulatable : simulatables)
             simulatable->Step(/*delta time*/);
 
-        Ecosim::Renderer::Background(backgroundColor);
+        // Ecosim::Renderer::Background(backgroundColor);
+        map.Render();
 
         for (const auto &renderable : renderables)
             renderable->Draw();
-
-        map.Render();
 
         Ecosim::Renderer::RenderFrame();
     }
