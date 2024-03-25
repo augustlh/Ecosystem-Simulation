@@ -1,8 +1,8 @@
 TARGET := out/Main.exe
 YAML_TARGET := out/Yaml.o
-OBJS := out/Main.o out/Window.o out/Renderer.o out/Vector2.o out/Map.o $(YAML_TARGET)
+OBJS := out/Main.o out/Window.o out/Renderer.o out/Vector2.o out/Map.o out/Simulation.o $(YAML_TARGET)
 
-C_FLAGS := -Wall -g
+C_FLAGS := -Wall -pedantic -g
 INCLUDE := -Isrc/include -Iinclude
 
 ifeq ($(OS),Windows_NT)

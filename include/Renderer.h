@@ -12,6 +12,7 @@ namespace Ecosim
     struct Color
     {
         uint8_t r, g, b, a;
+        Color(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a) : r(_r), g(_g), b(_b), a(_a) {}
     };
 
     class Renderer
@@ -20,6 +21,8 @@ namespace Ecosim
         static SDL_Renderer *m_sdlRenderer;
 
     public:
+        Renderer() = delete;
+
         static void SetSDLRenderer(SDL_Renderer *sdlRenderer);
 
         static void RenderFrame();
