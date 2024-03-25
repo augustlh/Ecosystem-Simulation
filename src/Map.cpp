@@ -11,236 +11,211 @@
 
 namespace Ecosim
 {
+    std::vector<Biome> GenerateBiomeTypes(Yaml::Node &biomesNode)
+    {
+        std::vector<Biome> biomes;
+
+        for (uint i = 0; i < biomesNode.Size(); ++i)
+        {
+            Yaml::Node &item = biomesNode[i];
+
+            std::string name = item["name"].As<std::string>("<unnamed biome>");
+            float probability = item["probability"].As<float>(0.0f);
+            Color color = Color(item["color"][0].As<int>(0), item["color"][1].As<int>(0), item["color"][2].As<int>(0), 255);
+
+            biomes.push_back(Biome(name, probability, color));
+        }
+
+        return biomes;
+    }
+
     void SetPixel(SDL_Surface *surface, int x, int y, uint32_t pixel)
     {
-        uint8_t *pixelAddr = (uint8_t *)surface->pixels + y * surface->pitch + x * sizeof(uint32_t);
-        *(uint32_t *)pixelAddr = pixel;
+        uint32_t *pixelAddr = (uint32_t *)surface->pixels + y * surface->w + x;
+        *pixelAddr = pixel;
     }
 
-    uint32_t GetPixel(SDL_Surface *surface, int x, int y)
+    size_t IndexFromCoordinate(uint x, uint y, uint h)
     {
-        uint8_t *pixelAddr = (uint8_t *)surface->pixels + y * surface->pitch + x * sizeof(uint32_t);
-        return *(uint32_t *)pixelAddr;
+        return x * h + y;
     }
 
-    void GenerateMap(SDL_Surface *surface, float waterHeight = 0.5f, double smoothness = 0.006, siv::PerlinNoise::seed_type seed = 0)
+    std::vector<float> GenerateHeightMap(uint w, uint h, float smoothness = 0.005f, uint seed = 0)
     {
-        const siv::PerlinNoise perlin(seed);
+        siv::PerlinNoise perlin(seed);
 
-        SDL_LockSurface(surface);
+        std::vector<float> heightMap;
+        heightMap.reserve(w * h);
 
-        for (int x = 0; x < surface->w; ++x)
+        for (uint x = 0; x < w; ++x)
         {
-            for (int y = 0; y < surface->h; ++y)
+            for (uint y = 0; y < h; ++y)
             {
-                double noise = perlin.octave2D_01(x * smoothness, y * smoothness, 4);
-
-                // uint32_t waterColor = SDL_MapRGB(surface->format, 51, 77, 102);
-                // uint32_t landColor = SDL_MapRGB(surface->format, 80, 140, 30);
-
-                // uint32_t color = noise > waterHeight ? landColor : waterColor;
-                // uint32_t color = waterColor * noise + landColor * (1 - noise);
-                uint32_t color = SDL_MapRGB(surface->format, (uint32_t)(noise * 255.0), (uint32_t)(noise * 255.0), (uint32_t)(noise * 255.0));
-
-                SetPixel(surface, x, y, color);
+                float noise = perlin.octave2D_01(x * smoothness, y * smoothness, 4);
+                heightMap.push_back(noise);
             }
         }
 
-        SDL_UnlockSurface(surface);
+        return heightMap;
     }
 
-    std::vector<Vector2<int>> DistributeBiomes(uint numBiomes, uint mapWidth, uint mapHeight)
+    struct BiomeCenter
     {
-        std::random_device randomDevice;
-        std::mt19937 generator(randomDevice());
+        Vector2<int> center;
+        uint type;
+        BiomeCenter(Vector2<int> _center, uint _type) : center(_center), type(_type) {}
+    };
+
+    std::vector<BiomeCenter> DistributeBiomesVoronoi(uint mapWidth, uint mapHeight, uint numPoints, std::vector<Biome> &biomes, uint seed)
+    {
+        std::mt19937 generator(seed);
 
         std::uniform_int_distribution<> randomWidth(0, mapWidth - 1);
         std::uniform_int_distribution<> randomHeight(0, mapHeight - 1);
+        std::uniform_real_distribution<float> random01(0.0f, 1.0f);
 
-        std::vector<Vector2<int>> centers;
-        centers.reserve(numBiomes);
+        std::vector<BiomeCenter> biomeCenters;
+        biomeCenters.reserve(numPoints);
 
-        for (uint i = 0; i < numBiomes; ++i)
+        uint biomeIndex = 0;
+        float nextProbability = 0.0f;
+
+        for (uint i = 0; i < numPoints; ++i)
         {
+            do
+            {
+                ++biomeIndex %= biomes.size();
+                nextProbability = biomes[biomeIndex].probability;
+            } while (nextProbability < random01(generator));
+
             int x = randomWidth(generator), y = randomHeight(generator);
-            centers.push_back(Vector2<int>(x, y));
+            biomeCenters.push_back(BiomeCenter(Vector2<int>(x, y), biomeIndex));
         }
 
-        return centers;
+        return biomeCenters;
     }
 
-    int FindClosestBiome(int x, int y, std::vector<Vector2<int>> &centers)
+    uint FindClosestBiomeType(int x, int y, std::vector<BiomeCenter> &biomeCenters)
     {
         float closestDistance = 10000000.0f;
-        int closestIndex = 0;
+        uint closestType = 0;
 
         float fx = static_cast<float>(x);
         float fy = static_cast<float>(y);
 
-        int index = 0;
-        for (const auto &center : centers)
+        for (const auto &biomeCenter : biomeCenters)
         {
-            float dx = static_cast<float>(center.x) - fx;
-            float dy = static_cast<float>(center.y) - fy;
+            float dx = static_cast<float>(biomeCenter.center.x) - fx;
+            float dy = static_cast<float>(biomeCenter.center.y) - fy;
 
             float distance = dx * dx + dy * dy;
             if (distance < closestDistance)
             {
                 closestDistance = distance;
-                closestIndex = index;
+                closestType = biomeCenter.type;
             }
-            ++index;
         }
 
-        return closestIndex;
+        return closestType;
     }
 
-    void GenerateBiomes(SDL_Surface *surface, std::vector<Vector2<int>> &centers)
+    std::vector<uint> GenerateBiomeMap(uint w, uint h, std::vector<Biome> &biomes, uint numBiomes = 20, uint seed = 0)
     {
-        std::vector<uint32_t> colors = {
-            SDL_MapRGB(surface->format, 156, 196, 47),
-            SDL_MapRGB(surface->format, 102, 124, 39),
-            SDL_MapRGB(surface->format, 81, 168, 57),
-            SDL_MapRGB(surface->format, 57, 168, 103),
-            SDL_MapRGB(surface->format, 32, 178, 93),
-            SDL_MapRGB(surface->format, 72, 160, 64),
-        };
+        std::vector<uint> biomeMap;
+        biomeMap.reserve(w * h);
 
-        SDL_LockSurface(surface);
+        std::vector<BiomeCenter> biomeCenters = std::move(DistributeBiomesVoronoi(w, h, numBiomes, biomes, seed));
 
-        for (int x = 0; x < surface->w; ++x)
+        siv::PerlinNoise perlin(seed);
+        double noiseScale = 25.0f;
+        double smoothness = 0.042f;
+
+        for (uint x = 0; x < w; ++x)
         {
-            for (int y = 0; y < surface->h; ++y)
+            for (uint y = 0; y < h; ++y)
             {
-                uint32_t color = colors[FindClosestBiome(x, y, centers) % colors.size()];
+                double fx = static_cast<double>(x);
+                double fy = static_cast<double>(y);
+
+                int dx = x + static_cast<int>(perlin.noise2D(fx * smoothness, fy * smoothness) * noiseScale);
+                int dy = y + static_cast<int>(perlin.noise2D(fy * smoothness, fx * smoothness) * noiseScale);
+
+                uint type = FindClosestBiomeType(dx, dy, biomeCenters);
+                biomeMap.push_back(type);
+            }
+        }
+
+        return biomeMap;
+    }
+
+    SDL_Texture *CreateMapTexture(uint w, uint h, std::vector<float> &heightMap, float waterLevel, std::vector<uint> &biomeMap, std::vector<Biome> &biomes)
+    {
+        SDL_Surface *surface = Renderer::RequestSDLSurface(w, h);
+
+        for (uint x = 0; x < w; ++x)
+        {
+            for (uint y = 0; y < h; ++y)
+            {
+                uint32_t waterColor = SDL_MapRGB(surface->format, 51, 77, 102);
+                uint32_t biomeColor = biomes[biomeMap[IndexFromCoordinate(x, y, h)]].color.Format(surface->format);
+
+                uint32_t color = heightMap[IndexFromCoordinate(x, y, h)] > waterLevel ? biomeColor : waterColor;
                 SetPixel(surface, x, y, color);
             }
         }
 
-        SDL_UnlockSurface(surface);
+        SDL_Texture *texture = Renderer::BakeTexture(surface);
+        SDL_FreeSurface(surface);
+
+        return texture;
     }
 
-    void ApplyBiomeSmoothing(SDL_Surface *surface)
-    {
-        int kernelSize = 5; // 3 / 2 = 1
-        int halfKernelSize = kernelSize / 2;
+    // =======================
+    //           Map
+    // =======================
 
-        std::vector<uint32_t> newColors;
-        newColors.reserve(surface->w * surface->h);
+    uint Map::m_width = 0;
+    uint Map::m_height = 0;
+    std::vector<uint> Map::m_biomeMap = {};
+    std::vector<float> Map::m_heightMap = {};
+    std::vector<Biome> Map::m_biomes = {};
+    SDL_Texture *Map::m_texture = nullptr;
+    float Map::m_waterLevel = 0.0f;
 
-        SDL_LockSurface(surface);
-
-        for (int i = 0; i < halfKernelSize; ++i)
-        {
-            for (int x = 0; x < surface->w; ++x)
-                newColors.push_back(GetPixel(surface, x, i));
-        }
-
-        for (int y = halfKernelSize; y < surface->h - halfKernelSize - 1; ++y)
-        {
-            for (int i = 0; i < halfKernelSize; ++i)
-            {
-                newColors.push_back(GetPixel(surface, i, y));
-            }
-
-            for (int x = halfKernelSize; x < surface->w - halfKernelSize - 1; ++x)
-            {
-                std::unordered_map<uint32_t, int> countMap;
-
-                for (int i = -halfKernelSize; i <= halfKernelSize; ++i)
-                {
-                    for (int j = -halfKernelSize; j <= halfKernelSize; ++j)
-                        ++countMap[GetPixel(surface, x + i, y + j)];
-                }
-
-                uint32_t mostCommon = 0;
-                int maxCount = 0;
-                for (const auto &pair : countMap)
-                {
-                    if (pair.second > maxCount)
-                    {
-                        mostCommon = pair.first;
-                        maxCount = pair.second;
-                    }
-                }
-
-                newColors.push_back(mostCommon);
-            }
-
-            for (int i = 0; i < halfKernelSize + 1; ++i)
-            {
-                newColors.push_back(GetPixel(surface, surface->w - (halfKernelSize + 1 - i), y));
-            }
-        }
-
-        for (int i = 0; i < halfKernelSize + 1; ++i)
-        {
-            for (int x = 0; x < surface->w; ++x)
-                newColors.push_back(GetPixel(surface, x, surface->h - (halfKernelSize + 1 - i)));
-        }
-
-        SDL_memcpy(surface->pixels, newColors.data(), surface->h * surface->pitch);
-
-        SDL_UnlockSurface(surface);
-    }
-
-    void MergeSurfaces(SDL_Surface *finalSurface, SDL_Surface *heightmapSurface, SDL_Surface *biomeSurface)
-    {
-        SDL_LockSurface(finalSurface);
-        SDL_LockSurface(heightmapSurface);
-        SDL_LockSurface(biomeSurface);
-
-        for (int x = 0; x < finalSurface->w; ++x)
-        {
-            for (int y = 0; y < finalSurface->h; ++y)
-            {
-                uint32_t mask = (GetPixel(heightmapSurface, x, y) & 255) > 160u ? 1u : 0u;
-                uint32_t color = GetPixel(biomeSurface, x, y) * mask + SDL_MapRGB(finalSurface->format, 51, 77, 102) * (1u - mask);
-
-                SetPixel(finalSurface, x, y, color);
-            }
-        }
-
-        SDL_UnlockSurface(finalSurface);
-        SDL_UnlockSurface(heightmapSurface);
-        SDL_UnlockSurface(biomeSurface);
-    }
-
-    Map::Map()
+    void Map::Create(const char *configPath)
     {
         Yaml::Node root;
-        Yaml::Parse(root, "configs/enviroments/islands.yaml");
+        Yaml::Parse(root, configPath);
 
-        Yaml::Node &generationNode = root["generation"];
-        // if (generationNode.IsNone())
+        // Biome type creation
+        Map::m_biomes = GenerateBiomeTypes(root["biomes"]);
 
-        uint32_t seed = generationNode["seed"].As<uint32_t>();
-        double smoothness = generationNode["smoothness"].As<double>();
-        float waterLevel = generationNode["water-level"].As<float>();
-        uint mapWidth = generationNode["map-width"].As<uint>(100);
-        uint mapHeight = generationNode["map-height"].As<uint>(100);
+        // Terrain and biome generation
+        Yaml::Node &generation = root["generation"];
 
-        SDL_Surface *heightmapSurface = Renderer::RequestSDLSurface(mapWidth, mapHeight);
+        uint32_t seed = generation["seed"].As<uint32_t>(0);
+        if (seed == 0)
+        {
+            std::random_device rd;
+            seed = rd();
+        }
 
-        GenerateMap(heightmapSurface, waterLevel, smoothness, seed);
+        float smoothness = generation["smoothness"].As<float>(0.005f);
+        m_width = generation["map-width"].As<uint>(100);
+        m_height = generation["map-height"].As<uint>(100);
+        Map::m_waterLevel = generation["water-level"].As<float>(0.6f);
+        uint numBiomes = generation["num-biomes"].As<uint>(25);
 
-        SDL_Surface *biomeSurface = Renderer::RequestSDLSurface(mapWidth, mapHeight);
+        Map::m_heightMap = std::move(GenerateHeightMap(Map::m_width, m_height, smoothness, seed));
+        Map::m_biomeMap = std::move(GenerateBiomeMap(Map::m_width, m_height, Map::m_biomes, numBiomes, seed));
 
-        std::vector<Vector2<int>> centers = DistributeBiomes(20, mapWidth, mapHeight);
-        GenerateBiomes(biomeSurface, centers);
+        // Generate map texture
+        Map::m_texture = CreateMapTexture(Map::m_width, m_height, Map::m_heightMap, Map::m_waterLevel, Map::m_biomeMap, Map::m_biomes);
+    }
 
-        // for (int i = 0; i < 1; ++i)
-        ApplyBiomeSmoothing(biomeSurface);
-
-        SDL_Surface *finalSurface = Renderer::RequestSDLSurface(mapWidth, mapHeight);
-
-        MergeSurfaces(finalSurface, heightmapSurface, biomeSurface);
-
-        m_texture = Renderer::BakeTexture(finalSurface);
-
-        SDL_FreeSurface(biomeSurface);
-        SDL_FreeSurface(heightmapSurface);
-        SDL_FreeSurface(finalSurface);
+    void Map::Cleanup()
+    {
+        SDL_DestroyTexture(m_texture);
     }
 
     void Map::Render()
@@ -248,8 +223,27 @@ namespace Ecosim
         Renderer::Texture(m_texture, Vector2<int>(0, 0));
     }
 
-    Map::~Map()
+    Biome &Map::BiomeAt(Vector2<int> coord)
     {
-        SDL_DestroyTexture(m_texture);
+        uint index = IndexFromCoordinate(coord.x, coord.y, Map::m_height);
+        if (index < Map::m_heightMap.size())
+            return Map::m_biomes[Map::m_biomeMap[index]];
+        return Map::m_biomes[0];
+    }
+
+    float Map::HeightAt(Vector2<int> coord)
+    {
+        uint index = IndexFromCoordinate(coord.x, coord.y, Map::m_height);
+        if (index < Map::m_heightMap.size())
+            return Map::m_heightMap[index];
+        return 0.5f;
+    }
+
+    bool Map::WaterAt(Vector2<int> coord)
+    {
+        uint index = IndexFromCoordinate(coord.x, coord.y, Map::m_height);
+        if (index < Map::m_heightMap.size())
+            return Map::m_heightMap[index] > Map::m_waterLevel;
+        return false;
     }
 }

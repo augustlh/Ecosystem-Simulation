@@ -22,19 +22,46 @@ Biomes
 */
 
 #include <SDL2/SDL.h>
+#include <vector>
+#include <string>
+
+#include "Renderer.h"
 
 namespace Ecosim
 {
+    struct Biome
+    {
+        std::string name;
+        float probability;
+        Color color;
+
+        Biome(std::string _name, float _probability, Color _color) : name(_name), probability(_probability), color(_color) {}
+    };
+
     class Map
     {
     private:
-        SDL_Texture *m_texture;
+        static uint m_width, m_height;
+
+        static std::vector<uint> m_biomeMap;
+        static std::vector<float> m_heightMap;
+        static std::vector<Biome> m_biomes;
+
+        static float m_waterLevel;
+
+        static SDL_Texture *m_texture;
 
     public:
-        // static Deserialize();
-        Map();
-        ~Map();
-        void Render();
+        Map() = delete;
+
+        static void Create(const char *configPath);
+        static void Cleanup();
+
+        static void Render();
+
+        static Biome &BiomeAt(Vector2<int> coord);
+        static float HeightAt(Vector2<int> coord);
+        static bool WaterAt(Vector2<int> coord);
     };
 }
 

@@ -44,7 +44,7 @@ namespace Ecosim
     {
         int textureWidth, textureHeight;
         SDL_QueryTexture(texture, NULL, NULL, &textureWidth, &textureHeight);
-        SDL_Rect destination = {.x = pos.x, .y = pos.y, .w = textureWidth, .h = textureHeight};
+        SDL_Rect destination = {pos.x, pos.y, textureWidth, textureHeight};
         SDL_RenderCopy(m_sdlRenderer, texture, NULL, &destination);
     }
 }

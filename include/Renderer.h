@@ -13,12 +13,14 @@ namespace Ecosim
     {
         uint8_t r, g, b, a;
         Color(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a) : r(_r), g(_g), b(_b), a(_a) {}
+        uint32_t Format(SDL_PixelFormat *format) { return SDL_MapRGB(format, r, g, b); }
     };
 
     class Renderer
     {
     private:
         static SDL_Renderer *m_sdlRenderer;
+        static SDL_PixelFormat *m_format;
 
     public:
         Renderer() = delete;

@@ -10,8 +10,6 @@
 #include <vector>
 #include <memory>
 
-#pragma region "Temporary objects"
-
 class GreenRenderable : public Ecosim::Renderable, public Ecosim::Simulatable
 {
 private:
@@ -70,8 +68,6 @@ public:
     }
 };
 
-#pragma endregion
-
 namespace Ecosim
 {
     Simulation::Simulation(const char *configPath)
@@ -91,6 +87,8 @@ namespace Ecosim
         SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
                     "Started simulation: '%s'\n  - Number of agents: %d\n  - Number of food:   %d\n  - Enviroment:       '%s'",
                     windowTitle.c_str(), m_numAgents, m_numFood, m_enviromentConfig.c_str());
+
+        Map::Create(m_enviromentConfig.c_str());
     }
 
     void Simulation::Simulate()
@@ -109,8 +107,6 @@ namespace Ecosim
         SDL_Event sdlEvent;
         bool shouldClose = false;
 
-        Map map;
-
         while (!shouldClose)
         {
             while (SDL_PollEvent(&sdlEvent))
@@ -123,12 +119,14 @@ namespace Ecosim
                 simulatable->Step(/*delta time*/);
 
             Renderer::Background(Color(0, 255, 0, 255));
-            map.Render();
+            Map::Render();
 
             for (const auto &renderable : renderables)
                 renderable->Draw();
 
             Renderer::RenderFrame();
         }
+
+        Map::Cleanup();
     }
 }
