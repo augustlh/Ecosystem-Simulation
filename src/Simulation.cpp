@@ -4,7 +4,7 @@
 #include "Interfaces.h"
 #include "Map.h"
 
-#include <yaml/Yaml.hpp>
+#include <MiniYaml/Yaml.hpp>
 
 #include <string>
 #include <vector>
@@ -19,13 +19,13 @@ private:
     int m_radius;
 
 public:
-    // GreenRenderable() : m_color({.r = 0, .g = 200, .b = 80, .a = 255}), m_center(120, 200), m_velocity(0), m_radius(40) {}
-    GreenRenderable() : m_color({0, 200, 80, 255}), m_center(120, 200), m_velocity(0), m_radius(40) {}
+    GreenRenderable() : m_color(0, 200, 80), m_center(120, 200), m_velocity(0), m_radius(40) {}
 
     void Draw() override
     {
         Ecosim::Vector2<int> direction(m_velocity.x * m_radius + 10, m_velocity.y * m_radius + 10);
-        Ecosim::Renderer::Line(m_center, m_center + direction, m_color);
+        // Ecosim::Renderer::Line(m_center, m_center + direction, m_color);
+        Ecosim::Renderer::Line(m_center, m_center + direction, 2, m_color);
         Ecosim::Renderer::Circle(m_center, m_radius, m_color);
     }
 
@@ -48,13 +48,12 @@ private:
     int m_radius;
 
 public:
-    // RedRenderable() : m_color({.r = 200, .g = 80, .b = 0, .a = 255}), m_center(300, 200), m_velocity(0), m_radius(60) {}
-    RedRenderable() : m_color({200, 80, 0, 255}), m_center(300, 200), m_velocity(0), m_radius(60) {}
+    RedRenderable() : m_color(200, 80, 0), m_center(300, 200), m_velocity(0), m_radius(60) {}
 
     void Draw() override
     {
         Ecosim::Vector2<int> direction(m_velocity.x * m_radius + 10, m_velocity.y * m_radius + 10);
-        Ecosim::Renderer::Line(m_center, m_center + direction, m_color);
+        Ecosim::Renderer::Line(m_center, m_center + direction, 2, m_color);
         Ecosim::Renderer::Circle(m_center, m_radius, m_color);
     }
 
@@ -111,14 +110,14 @@ namespace Ecosim
         {
             while (SDL_PollEvent(&sdlEvent))
             {
-                if (sdlEvent.type == SDL_QUIT)
+                if (sdlEvent.type == SDL_EVENT_QUIT)
                     shouldClose = true;
             }
 
             for (const auto &simulatable : simulatables)
                 simulatable->Step(/*delta time*/);
 
-            Renderer::Background(Color(0, 255, 0, 255));
+            Renderer::Background(Color(0, 255, 0));
             Map::Render();
 
             for (const auto &renderable : renderables)

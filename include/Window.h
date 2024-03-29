@@ -1,22 +1,20 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 namespace Ecosim
 {
     class Window
     {
-        // friend class Window;
-
     private:
         SDL_Window *m_window;
-        SDL_Renderer *m_renderer;
+        // SDL_Renderer *m_renderer;
 
         unsigned int m_width, m_height;
 
     public:
-        const unsigned int &width, &height;
+        // const unsigned int &width, &height;
 
     public:
         Window();

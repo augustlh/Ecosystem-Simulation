@@ -21,7 +21,7 @@ Biomes
 
 */
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <vector>
 #include <string>
 
@@ -49,7 +49,7 @@ namespace Ecosim
 
         static float m_waterLevel;
 
-        static SDL_Texture *m_texture;
+        static SDL_Surface *m_surface;
 
     public:
         Map() = delete;

@@ -6,8 +6,8 @@
 #include <random>
 #include <cmath>
 
-#include <Noise/PerlinNoise.hpp>
-#include <yaml/Yaml.hpp>
+#include <PerlinNoise/PerlinNoise.hpp>
+#include <MiniYaml/Yaml.hpp>
 
 namespace Ecosim
 {
@@ -21,7 +21,7 @@ namespace Ecosim
 
             std::string name = item["name"].As<std::string>("<unnamed biome>");
             float probability = item["probability"].As<float>(0.0f);
-            Color color = Color(item["color"][0].As<int>(0), item["color"][1].As<int>(0), item["color"][2].As<int>(0), 255);
+            Color color = Color(item["color"][0].As<int>(0), item["color"][1].As<int>(0), item["color"][2].As<int>(0));
 
             biomes.push_back(Biome(name, probability, color));
         }
@@ -148,9 +148,9 @@ namespace Ecosim
         return biomeMap;
     }
 
-    SDL_Texture *CreateMapTexture(uint w, uint h, std::vector<float> &heightMap, float waterLevel, std::vector<uint> &biomeMap, std::vector<Biome> &biomes)
+    SDL_Surface *CreateMapTexture(uint w, uint h, std::vector<float> &heightMap, float waterLevel, std::vector<uint> &biomeMap, std::vector<Biome> &biomes)
     {
-        SDL_Surface *surface = Renderer::RequestSDLSurface(w, h);
+        SDL_Surface *surface = Renderer::RequestSurface(w, h);
 
         for (uint x = 0; x < w; ++x)
         {
@@ -164,10 +164,7 @@ namespace Ecosim
             }
         }
 
-        SDL_Texture *texture = Renderer::BakeTexture(surface);
-        SDL_FreeSurface(surface);
-
-        return texture;
+        return surface;
     }
 
     // =======================
@@ -179,7 +176,7 @@ namespace Ecosim
     std::vector<uint> Map::m_biomeMap = {};
     std::vector<float> Map::m_heightMap = {};
     std::vector<Biome> Map::m_biomes = {};
-    SDL_Texture *Map::m_texture = nullptr;
+    SDL_Surface *Map::m_surface = nullptr;
     float Map::m_waterLevel = 0.0f;
 
     void Map::Create(const char *configPath)
@@ -210,17 +207,19 @@ namespace Ecosim
         Map::m_biomeMap = std::move(GenerateBiomeMap(Map::m_width, m_height, Map::m_biomes, numBiomes, seed));
 
         // Generate map texture
-        Map::m_texture = CreateMapTexture(Map::m_width, m_height, Map::m_heightMap, Map::m_waterLevel, Map::m_biomeMap, Map::m_biomes);
+        Map::m_surface = CreateMapTexture(Map::m_width, m_height, Map::m_heightMap, Map::m_waterLevel, Map::m_biomeMap, Map::m_biomes);
     }
 
     void Map::Cleanup()
     {
-        SDL_DestroyTexture(m_texture);
+        SDL_DestroySurface(m_surface);
+        // SDL_FreeSurface(m_surface);
     }
 
     void Map::Render()
     {
-        Renderer::Texture(m_texture, Vector2<int>(0, 0));
+        // Renderer::Surface(Vector2<int>(0, 0), m_surface);
+        Renderer::Surface(0, 0, m_surface);
     }
 
     Biome &Map::BiomeAt(Vector2<int> coord)

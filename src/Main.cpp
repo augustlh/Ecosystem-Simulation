@@ -1,9 +1,19 @@
 #include "Simulation.h"
+#include <iostream>
 
 int main(void)
 {
-    Ecosim::Simulation simulation("configs/simulations/firstSim.yaml");
-    simulation.Simulate();
+    try
+    {
+        Ecosim::Simulation simulation("C:/dev/projects/Ecosystem-Simulation/configs/simulations/firstSim.yaml");
+        simulation.Simulate();
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        throw;
+    }
+
     return 0;
 }
 
