@@ -235,6 +235,10 @@ namespace Ecosim
         Renderer::Surface(0, 0, m_surface);
     }
 
+    uint Map::Width() { return m_config.mapWidth; }
+
+    uint Map::Height() { return m_config.mapHeight; }
+
     Biome &Map::BiomeAt(Vector2<int> coord)
     {
         uint index = IndexFromCoordinate(coord.x, coord.y, m_config.mapHeight);

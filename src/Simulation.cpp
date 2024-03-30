@@ -4,6 +4,7 @@
 #include "Interfaces.h"
 #include "Map.h"
 #include "Exceptions.h"
+#include "Camera.h"
 
 #include <MiniYaml/Yaml.hpp>
 
@@ -25,15 +26,14 @@ public:
     void Draw() override
     {
         Ecosim::Vector2<int> direction(m_velocity.x * m_radius + 10, m_velocity.y * m_radius + 10);
-        // Ecosim::Renderer::Line(m_center, m_center + direction, m_color);
         Ecosim::Renderer::Line(m_center, m_center + direction, 2, m_color);
         Ecosim::Renderer::Circle(m_center, m_radius, m_color);
     }
 
     void Step() override
     {
-        m_velocity.x = (std::rand() % 10) - 5;
-        m_velocity.y = (std::rand() % 10) - 5;
+        m_velocity.x = (std::rand() % 11) - 5;
+        m_velocity.y = (std::rand() % 11) - 5;
 
         m_center.x += m_velocity.x;
         m_center.y += m_velocity.y;
@@ -60,13 +60,40 @@ public:
 
     void Step() override
     {
-        m_velocity.x = (std::rand() % 10) - 5;
-        m_velocity.y = (std::rand() % 10) - 5;
+        m_velocity.x = (std::rand() % 11) - 5;
+        m_velocity.y = (std::rand() % 11) - 5;
 
         m_center.x += m_velocity.x;
         m_center.y += m_velocity.y;
     }
 };
+
+void handleKeyRelease(SDL_KeyboardEvent &keyEvent)
+{
+    Ecosim::Vector2<float> move{};
+    switch (keyEvent.keysym.sym)
+    {
+    case SDLK_w:
+        move.y = -50.0f;
+        break;
+    case SDLK_a:
+        move.x = -50.0f;
+        break;
+    case SDLK_s:
+        move.y = 50.0f;
+        break;
+    case SDLK_d:
+        move.x = 50.0f;
+        break;
+    case SDLK_z:
+        Ecosim::Camera::Zoom(0.2f);
+        break;
+    case SDLK_x:
+        Ecosim::Camera::Zoom(-0.2f);
+        break;
+    }
+    Ecosim::Camera::MovePosition(move);
+}
 
 namespace Ecosim
 {
@@ -125,15 +152,23 @@ namespace Ecosim
         {
             while (SDL_PollEvent(&sdlEvent))
             {
-                if (sdlEvent.type == SDL_EVENT_QUIT)
+                switch (sdlEvent.type)
+                {
+                case SDL_EVENT_QUIT:
                     shouldClose = true;
+                    break;
+                case SDL_EVENT_KEY_UP:
+                    handleKeyRelease(sdlEvent.key);
+                    break;
+                }
             }
 
             for (const auto &simulatable : simulatables)
                 simulatable->Step(/*delta time*/);
 
-            Renderer::Background(Color(0, 255, 0));
+            Renderer::Background(Color(51, 77, 102));
             Map::Render();
+            Renderer::Circle(80, 100, 50, Color(180, 80, 150));
 
             for (const auto &renderable : renderables)
                 renderable->Draw();

@@ -1,5 +1,7 @@
 #include "Renderer.h"
+#include "Camera.h"
 #include <algorithm>
+#include <iostream>
 
 namespace Ecosim
 {
@@ -12,8 +14,7 @@ namespace Ecosim
             std::swap(x0, x1);
 
         SDL_Rect rect = {x0, y, x1 - x0, 1};
-        uint32_t sdlColor = SDL_MapRGB(m_sdlSurface->format, color.r, color.g, color.b);
-        SDL_FillSurfaceRect(m_sdlSurface, &rect, sdlColor);
+        SDL_FillSurfaceRect(m_sdlSurface, &rect, color.Format(m_sdlSurface->format));
     }
 
     void Renderer::Renderer::SetupSDLRenderSurface(SDL_Window *sdlWindow)
@@ -22,38 +23,38 @@ namespace Ecosim
         m_sdlSurface = SDL_GetWindowSurface(sdlWindow);
     }
 
-    // SDL_Surface *Renderer::RequestSurface(int width, int height) { return SDL_CreateSurface(0, width, height, 32, 0, 0, 0, 0); }
     SDL_Surface *Renderer::RequestSurface(int width, int height) { return SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGBX32); }
 
     void Renderer::RenderFrame() { SDL_UpdateWindowSurface(m_sdlWindow); }
 
     void Renderer::Background(Color color)
     {
-        uint32_t sdlColor = SDL_MapRGB(m_sdlSurface->format, color.r, color.g, color.b);
-        SDL_FillSurfaceRect(m_sdlSurface, &m_sdlSurface->clip_rect, sdlColor);
+        SDL_FillSurfaceRect(m_sdlSurface, &m_sdlSurface->clip_rect, color.Format(m_sdlSurface->format));
     }
 
     void Renderer::Rect(const Vector2<int> &pos, const Vector2<int> &size, Color color) { Rect(pos.x, pos.y, size.x, size.y, color); }
     void Renderer::Rect(int x, int y, int w, int h, Color color)
     {
-        SDL_Rect rect = {x, y, w, h};
-        uint32_t sdlColor = SDL_MapRGB(m_sdlSurface->format, color.r, color.g, color.b);
-        SDL_FillSurfaceRect(m_sdlSurface, &rect, sdlColor);
+        SDL_Rect rect = Camera::TranslateRect(Vector2<int>(x, y), Vector2<int>(w, h)); // TODO: make TranslateRect(int, int, int, int)
+        SDL_FillSurfaceRect(m_sdlSurface, &rect, color.Format(m_sdlSurface->format));
     }
 
     void Renderer::Circle(const Vector2<int> &pos, int r, Color color) { Circle(pos.x, pos.y, r, color); }
     void Renderer::Circle(int x, int y, int r, Color color)
     {
         // https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
+        Vector2<int> center = Camera::TranslatePoint(Vector2<int>(x, y));
+        r = Camera::TranslateDistance(r);
+
         int t1 = r >> 4, t2 = 0;
         int dx = r, dy = 0;
 
         while (dx >= dy)
         {
-            HLine(x - dx, x + dx, y + dy, color);
-            HLine(x - dx, x + dx, y - dy, color);
-            HLine(x - dy, x + dy, y + dx, color);
-            HLine(x - dy, x + dy, y - dx, color);
+            HLine(center.x - dx, center.x + dx, center.y + dy, color);
+            HLine(center.x - dx, center.x + dx, center.y - dy, color);
+            HLine(center.x - dy, center.x + dy, center.y + dx, color);
+            HLine(center.x - dy, center.x + dy, center.y - dx, color);
 
             dy += 1;
             t1 += dy;
@@ -71,39 +72,43 @@ namespace Ecosim
     void Renderer::Line(int x0, int y0, int x1, int y1, int size, Color color)
     {
         // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
-        int dx = std::abs(x1 - x0);
-        int sx = x0 < x1 ? 1 : -1;
-        int dy = -std::abs(y1 - y0);
-        int sy = y0 < y1 ? 1 : -1;
+
+        Vector2<int> p0 = Camera::TranslatePoint(Vector2<int>(x0, y0));
+        Vector2<int> p1 = Camera::TranslatePoint(Vector2<int>(x1, y1));
+
+        int dx = std::abs(p1.x - p0.x);
+        int sx = p0.x < p1.x ? 1 : -1;
+        int dy = -std::abs(p1.y - p0.y);
+        int sy = p0.y < p1.y ? 1 : -1;
 
         int error = dx + dy, e2 = 0;
 
-        uint32_t sdlColor = SDL_MapRGB(m_sdlSurface->format, color.r, color.g, color.b);
+        uint32_t sdlColor = color.Format(m_sdlSurface->format);
         SDL_Rect point = {0, 0, size, size};
 
         while (true)
         {
-            point.x = x0 - (size >> 2);
-            point.y = y0 - (size >> 2);
+            point.x = p0.x - (size >> 2);
+            point.y = p0.y - (size >> 2);
             SDL_FillSurfaceRect(m_sdlSurface, &point, sdlColor);
 
-            if (x0 == x1 && y0 == y1)
+            if (p0.x == p1.x && p0.y == p1.y)
                 break;
 
             e2 = error * 2;
             if (e2 >= dy)
             {
-                if (x0 == x1)
+                if (p0.x == p1.x)
                     break;
                 error += dy;
-                x0 += sx;
+                p0.x += sx;
             }
             if (e2 <= dx)
             {
-                if (y0 == y1)
+                if (p0.y == p1.y)
                     break;
                 error += dx;
-                y0 += sy;
+                p0.y += sy;
             }
         }
     }
@@ -111,7 +116,8 @@ namespace Ecosim
     void Renderer::Surface(const Vector2<int> &pos, SDL_Surface *surface) { Surface(pos.x, pos.y, surface); }
     void Renderer::Surface(int x, int y, SDL_Surface *surface)
     {
-        SDL_Rect rect = {x, y, surface->w, surface->h};
-        SDL_BlitSurface(surface, NULL, m_sdlSurface, &rect);
+        SDL_Rect rect = Camera::TranslateRect(Vector2<int>(x, y), Vector2<int>(surface->w, surface->h));
+        // SDL_BlitSurface(surface, NULL, m_sdlSurface, &rect);
+        SDL_BlitSurfaceScaled(surface, NULL, m_sdlSurface, &rect, SDL_SCALEMODE_NEAREST);
     }
 }

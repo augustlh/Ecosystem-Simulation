@@ -38,16 +38,12 @@ namespace Ecosim
         static void RenderFrame();
 
         static void Background(Color color);
-        // Rects...
         static void Rect(int x, int y, int w, int h, Color color);
         static void Rect(const Vector2<int> &pos, const Vector2<int> &size, Color color);
-        // Circles...
         static void Circle(int x, int y, int r, Color color);
         static void Circle(const Vector2<int> &pos, int r, Color color);
-        // Lines...
         static void Line(int x0, int y0, int x1, int y1, int size, Color color);
         static void Line(const Vector2<int> &pos0, const Vector2<int> &pos1, int size, Color color);
-        // Surfaces...
         static void Surface(int x, int y, SDL_Surface *surface);
         static void Surface(const Vector2<int> &pos, SDL_Surface *surface);
     };

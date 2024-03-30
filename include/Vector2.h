@@ -1,6 +1,9 @@
 #ifndef VECTOR2_H
 #define VECTOR2_H
 
+#include <iostream>
+#include <cmath>
+
 namespace Ecosim
 {
     /**
@@ -19,7 +22,7 @@ namespace Ecosim
         /**
          * @brief Initializes both coordinates to zero
          */
-        Vector2() : x(0), y(0) {}
+        Vector2() = default;
 
         /**
          * @brief Initializes both coordinates to a single value given by `_n`
@@ -34,12 +37,39 @@ namespace Ecosim
          */
         Vector2(T _x, T _y) : x(_x), y(_y) {}
 
+        // Vector2<int> Round() { return Vector2<int>(static_cast<int>(x), static_cast<int>(y)); }
+
+        template <typename R>
+        Vector2<R> Convert() const { return Vector2<R>(static_cast<R>(x), static_cast<R>(y)); }
+
+        float Magnitude() const { return std::sqrtf(x * x + y * y); }
+
         /**
          * @brief Vector-vector addition, returning a new Vector2<T> object
          * @param other The vector to add to this vector
          * @return The elementwise sum of the two vectors
          */
         Vector2<T> operator+(const Vector2<T> &other) const { return Vector2<T>(x + other.x, y + other.y); }
+
+        Vector2<T> operator-(const Vector2<T> &other) const { return Vector2<T>(x - other.x, y - other.y); }
+
+        Vector2<T> operator*(T scalar) const { return Vector2<T>(x * scalar, y * scalar); }
+
+        Vector2<T> operator/(T scalar) const { return Vector2<T>(x / scalar, y / scalar); }
+
+        Vector2<T> &operator+=(const Vector2<T> &other)
+        {
+            this->x += other.x;
+            this->y += other.y;
+            return *this;
+        }
+
+        Vector2<T> &operator-=(const Vector2<T> &other)
+        {
+            this->x -= other.x;
+            this->y -= other.y;
+            return *this;
+        }
     };
 }
 

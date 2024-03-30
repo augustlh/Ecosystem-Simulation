@@ -7,6 +7,7 @@ add_subdirectory("external/SDL")
 add_subdirectory("external/MiniYaml")
 
 set(SOURCES
+    "src/Camera.cpp"
     "src/Main.cpp"
     "src/Map.cpp"
     "src/Renderer.cpp"
@@ -15,6 +16,8 @@ set(SOURCES
 )
 
 set(HEADERS
+    "include/Camera.h"
+    "include/Exceptions.h"
     "include/Interfaces.h"
     "include/Map.h"
     "include/Renderer.h"

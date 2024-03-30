@@ -71,6 +71,9 @@ namespace Ecosim
 
         static void Render();
 
+        static uint Width();
+        static uint Height();
+
         static Biome &BiomeAt(Vector2<int> coord);
         static float HeightAt(Vector2<int> coord);
         static bool WaterAt(Vector2<int> coord);
