@@ -39,11 +39,8 @@ namespace Ecosim
          * @param other The vector to add to this vector
          * @return The elementwise sum of the two vectors
          */
-        Vector2<T> &operator+(const Vector2<T> &other) const { return Vector2<T>(x + other.x, y + other.y); }
+        Vector2<T> operator+(const Vector2<T> &other) const { return Vector2<T>(x + other.x, y + other.y); }
     };
-
-    // template class Ecosim::Vector2<int>;
-    // template class Ecosim::Vector2<float>;
 }
 
 #endif

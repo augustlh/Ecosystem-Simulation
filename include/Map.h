@@ -38,22 +38,34 @@ namespace Ecosim
         Biome(std::string _name, float _probability, Color _color) : name(_name), probability(_probability), color(_color) {}
     };
 
+    class EnviromentConfig
+    {
+    public:
+        uint seed;
+        float smoothness;
+        float waterLevel;
+        uint mapWidth;
+        uint mapHeight;
+        uint numBiomes;
+        std::vector<Biome> biomes;
+
+        EnviromentConfig() = default;
+        EnviromentConfig(std::string &configPath);
+        EnviromentConfig(const char *configPath);
+    };
+
     class Map
     {
     private:
-        static uint m_width, m_height;
-
+        static EnviromentConfig m_config;
         static std::vector<uint> m_biomeMap;
         static std::vector<float> m_heightMap;
-        static std::vector<Biome> m_biomes;
-
-        static float m_waterLevel;
-
         static SDL_Surface *m_surface;
 
     public:
         Map() = delete;
 
+        static void Create(std::string &configPath);
         static void Create(const char *configPath);
         static void Cleanup();
 

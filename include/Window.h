@@ -9,15 +9,10 @@ namespace Ecosim
     {
     private:
         SDL_Window *m_window;
-        // SDL_Renderer *m_renderer;
-
         unsigned int m_width, m_height;
 
     public:
-        // const unsigned int &width, &height;
-
-    public:
-        Window();
+        Window() = default;
         Window(const char *title, unsigned int width, unsigned int height);
         ~Window();
 

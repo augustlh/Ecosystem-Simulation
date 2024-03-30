@@ -11,7 +11,6 @@ set(SOURCES
     "src/Map.cpp"
     "src/Renderer.cpp"
     "src/Simulation.cpp"
-    "src/Vector2.cpp"
     "src/Window.cpp"
 )
 
@@ -31,3 +30,5 @@ target_include_directories(Ecosim PRIVATE "include")
 target_include_directories(Ecosim PRIVATE "external/SDL/include")
 target_include_directories(Ecosim PRIVATE "external/MiniYaml/include")
 target_include_directories(Ecosim PRIVATE "external/PerlinNoise/include")
+
+add_custom_target(run COMMAND Ecosim DEPENDS Ecosim WORKING_DIRECTORY ${CMAKE_PROJECT_DIR})

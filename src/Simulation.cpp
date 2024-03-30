@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "Interfaces.h"
 #include "Map.h"
+#include "Exceptions.h"
 
 #include <MiniYaml/Yaml.hpp>
 
@@ -69,25 +70,39 @@ public:
 
 namespace Ecosim
 {
-    Simulation::Simulation(const char *configPath)
+    SimulationConfig::SimulationConfig(std::string &configPath) { SimulationConfig(configPath.c_str()); }
+    SimulationConfig::SimulationConfig(const char *configPath)
     {
         Yaml::Node root;
-        Yaml::Parse(root, configPath);
+        try
+        {
+            Yaml::Parse(root, configPath);
+        }
+        ECOSIM_CATCH_AND_CALL(Yaml::ParsingException & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to parse yaml source: '%s'\n%s", configPath, e.what()))
+        ECOSIM_CATCH_AND_CALL(Yaml::OperationException & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Invalid filepath to yaml source: '%s'", configPath))
+        ECOSIM_CATCH_AND_CALL(std::exception & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to open and read yaml source: '%s'\n%s", configPath, e.what()))
 
-        std::string windowTitle = root["simulation-name"].As<std::string>("Ecosim");
-        m_window = Window(windowTitle.c_str(), 800, 800);
+        name = root["simulation-name"].As<std::string>("Ecosim");
+        numAgents = root["num-agents"].As<uint>(100);
+        numFood = root["total-food"].As<uint>(100);
+        enviromentConfigPath = root["enviroment"].As<std::string>("<no enviroment>");
+        numSteps = root["num-steps"].As<uint>(100);
+        storeData = root["store-data"].As<bool>(false);
+    }
 
-        m_numAgents = root["num-agents"].As<int>(100);
-        m_numFood = root["total-food"].As<int>(100);
-        m_enviromentConfig = root["enviroment"].As<std::string>("<no enviroment>");
+    Simulation::Simulation(std::string &configPath) { Simulation(configPath.c_str()); }
+    Simulation::Simulation(const char *configPath)
+    {
+        m_config = SimulationConfig(configPath);
+        m_window = Window(m_config.name.c_str(), 800, 800);
 
         SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
         SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
                     "Started simulation: '%s'\n  - Number of agents: %d\n  - Number of food:   %d\n  - Enviroment:       '%s'",
-                    windowTitle.c_str(), m_numAgents, m_numFood, m_enviromentConfig.c_str());
+                    m_config.name.c_str(), m_config.numAgents, m_config.numFood, m_config.enviromentConfigPath.c_str());
 
-        Map::Create(m_enviromentConfig.c_str());
+        Map::Create(m_config.enviromentConfigPath);
     }
 
     void Simulation::Simulate()

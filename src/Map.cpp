@@ -1,5 +1,6 @@
 #include "Map.h"
 #include "Renderer.h"
+#include "Exceptions.h"
 
 #include <vector>
 #include <iostream>
@@ -167,72 +168,84 @@ namespace Ecosim
         return surface;
     }
 
-    // =======================
-    //           Map
-    // =======================
+    // ====================================
+    //           EnviromentConfig
+    // ====================================
 
-    uint Map::m_width = 0;
-    uint Map::m_height = 0;
-    std::vector<uint> Map::m_biomeMap = {};
-    std::vector<float> Map::m_heightMap = {};
-    std::vector<Biome> Map::m_biomes = {};
-    SDL_Surface *Map::m_surface = nullptr;
-    float Map::m_waterLevel = 0.0f;
-
-    void Map::Create(const char *configPath)
+    EnviromentConfig::EnviromentConfig(std::string &configPath) { EnviromentConfig(configPath.c_str()); }
+    EnviromentConfig::EnviromentConfig(const char *configPath)
     {
         Yaml::Node root;
-        Yaml::Parse(root, configPath);
+        try
+        {
+            Yaml::Parse(root, configPath);
+        }
+        ECOSIM_CATCH_AND_CALL(Yaml::ParsingException & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to parse yaml source: '%s'\n%s", configPath, e.what()))
+        ECOSIM_CATCH_AND_CALL(Yaml::OperationException & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Invalid filepath to yaml source: '%s'", configPath))
+        ECOSIM_CATCH_AND_CALL(std::exception & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to open and read yaml source: '%s'\n%s", configPath, e.what()))
 
-        // Biome type creation
-        Map::m_biomes = GenerateBiomeTypes(root["biomes"]);
-
-        // Terrain and biome generation
         Yaml::Node &generation = root["generation"];
 
-        uint32_t seed = generation["seed"].As<uint32_t>(0);
+        seed = generation["seed"].As<uint>(0);
+        smoothness = generation["smoothness"].As<float>(0.005f);
+        waterLevel = generation["water-level"].As<float>(0.6f);
+        mapWidth = generation["map-width"].As<uint>(100);
+        mapHeight = generation["map-height"].As<uint>(100);
+        numBiomes = generation["num-biomes"].As<uint>(25);
+
+        biomes = GenerateBiomeTypes(root["biomes"]);
+
         if (seed == 0)
         {
             std::random_device rd;
             seed = rd();
         }
+    }
 
-        float smoothness = generation["smoothness"].As<float>(0.005f);
-        m_width = generation["map-width"].As<uint>(100);
-        m_height = generation["map-height"].As<uint>(100);
-        Map::m_waterLevel = generation["water-level"].As<float>(0.6f);
-        uint numBiomes = generation["num-biomes"].As<uint>(25);
+    // =======================
+    //           Map
+    // =======================
 
-        Map::m_heightMap = std::move(GenerateHeightMap(Map::m_width, m_height, smoothness, seed));
-        Map::m_biomeMap = std::move(GenerateBiomeMap(Map::m_width, m_height, Map::m_biomes, numBiomes, seed));
+    EnviromentConfig Map::m_config;
+    std::vector<uint> Map::m_biomeMap = {};
+    std::vector<float> Map::m_heightMap = {};
+    SDL_Surface *Map::m_surface = nullptr;
 
-        // Generate map texture
-        Map::m_surface = CreateMapTexture(Map::m_width, m_height, Map::m_heightMap, Map::m_waterLevel, Map::m_biomeMap, Map::m_biomes);
+    void Map::Create(std::string &configPath) { Create(configPath.c_str()); }
+    void Map::Create(const char *configPath)
+    {
+        m_config = EnviromentConfig(configPath);
+
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
+                    "Generating map with parameters:\n  - Seed:             %u\n  - Width and height: %ux%u\n  - Smoothness:       %f\n  - Water level:      %f\n  - Number of biomes: %u",
+                    m_config.seed, m_config.mapWidth, m_config.mapHeight, m_config.smoothness, m_config.waterLevel, m_config.numBiomes);
+
+        m_heightMap = std::move(GenerateHeightMap(m_config.mapWidth, m_config.mapHeight, m_config.smoothness, m_config.seed));
+        m_biomeMap = std::move(GenerateBiomeMap(m_config.mapWidth, m_config.mapHeight, m_config.biomes, m_config.numBiomes, m_config.seed));
+        m_surface = CreateMapTexture(m_config.mapWidth, m_config.mapHeight, m_heightMap, m_config.waterLevel, m_biomeMap, m_config.biomes);
     }
 
     void Map::Cleanup()
     {
         SDL_DestroySurface(m_surface);
-        // SDL_FreeSurface(m_surface);
     }
 
     void Map::Render()
     {
-        // Renderer::Surface(Vector2<int>(0, 0), m_surface);
         Renderer::Surface(0, 0, m_surface);
     }
 
     Biome &Map::BiomeAt(Vector2<int> coord)
     {
-        uint index = IndexFromCoordinate(coord.x, coord.y, Map::m_height);
+        uint index = IndexFromCoordinate(coord.x, coord.y, m_config.mapHeight);
         if (index < Map::m_heightMap.size())
-            return Map::m_biomes[Map::m_biomeMap[index]];
-        return Map::m_biomes[0];
+            return m_config.biomes[Map::m_biomeMap[index]];
+        return m_config.biomes[0];
     }
 
     float Map::HeightAt(Vector2<int> coord)
     {
-        uint index = IndexFromCoordinate(coord.x, coord.y, Map::m_height);
+        uint index = IndexFromCoordinate(coord.x, coord.y, m_config.mapHeight);
         if (index < Map::m_heightMap.size())
             return Map::m_heightMap[index];
         return 0.5f;
@@ -240,9 +253,9 @@ namespace Ecosim
 
     bool Map::WaterAt(Vector2<int> coord)
     {
-        uint index = IndexFromCoordinate(coord.x, coord.y, Map::m_height);
+        uint index = IndexFromCoordinate(coord.x, coord.y, m_config.mapHeight);
         if (index < Map::m_heightMap.size())
-            return Map::m_heightMap[index] > Map::m_waterLevel;
+            return Map::m_heightMap[index] > m_config.waterLevel;
         return false;
     }
 }
