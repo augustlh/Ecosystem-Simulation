@@ -54,8 +54,10 @@ namespace Ecosim
         Vector2<T> operator-(const Vector2<T> &other) const { return Vector2<T>(x - other.x, y - other.y); }
 
         Vector2<T> operator*(T scalar) const { return Vector2<T>(x * scalar, y * scalar); }
+        Vector2<T> operator*(Vector2<T> &vec) const { return Vector2<T>(x * vec.x, y * vec.y); }
 
         Vector2<T> operator/(T scalar) const { return Vector2<T>(x / scalar, y / scalar); }
+        Vector2<T> operator/(Vector2<T> &vec) const { return Vector2<T>(x / vec.x, y / vec.y); }
 
         Vector2<T> &operator+=(const Vector2<T> &other)
         {
@@ -68,6 +70,20 @@ namespace Ecosim
         {
             this->x -= other.x;
             this->y -= other.y;
+            return *this;
+        }
+
+        Vector2<T> &operator*=(T scalar)
+        {
+            this->x *= scalar;
+            this->y *= scalar;
+            return *this;
+        }
+
+        Vector2<T> &operator/=(T scalar)
+        {
+            this->x /= scalar;
+            this->y /= scalar;
             return *this;
         }
     };

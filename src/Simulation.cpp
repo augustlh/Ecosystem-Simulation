@@ -123,6 +123,9 @@ namespace Ecosim
         m_config = SimulationConfig(configPath);
         m_window = Window(m_config.name.c_str(), 800, 800);
 
+        Camera::SetViewport(Vector2<float>(800.0f, 800.0f));
+        Camera::SetZoom(0.25f);
+
         SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
         SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
