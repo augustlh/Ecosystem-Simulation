@@ -1,4 +1,0 @@
-
-Jeg har lavet lidt på renderering
-Det kræver at du installere SDL2_gfx
-   (måske her, idk: https://sourceforge.net/projects/sdl2gfx/)

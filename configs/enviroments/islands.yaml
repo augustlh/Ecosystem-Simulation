@@ -1,0 +1,36 @@
+generation:
+    seed: 0
+    smoothness: 0.003
+    water-level: 0.65
+    map-width: 800
+    map-height: 800
+    num-biomes: 50
+
+biomes:
+    - name: grassy
+      color:
+          - 52
+          - 168
+          - 59
+      probability: 0.5
+
+    - name: rocky
+      color:
+          - 112
+          - 103
+          - 96
+      probability: 0.1
+
+    - name: foresty
+      color:
+          - 48
+          - 94
+          - 36
+      probability: 0.4
+
+    - name: fields
+      color:
+          - 232
+          - 208
+          - 27
+      probability: 0.3

@@ -1,7 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 namespace Ecosim
 {
@@ -9,15 +9,16 @@ namespace Ecosim
     {
     private:
         SDL_Window *m_window;
-        SDL_Renderer *m_renderer;
-
         unsigned int m_width, m_height;
 
     public:
+        Window() = default;
         Window(const char *title, unsigned int width, unsigned int height);
         ~Window();
 
-        const unsigned int &width, &height;
+        void Create(const char *title, unsigned int width, unsigned int height);
+
+        Window &operator=(Window &&other);
     };
 }
 

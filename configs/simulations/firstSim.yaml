@@ -1,0 +1,6 @@
+simulation-name: "Super cool simulation (wow)"
+num-agents: 100
+total-food: 500
+enviroment: "C:/dev/projects/Ecosystem-Simulation/configs/enviroments/islands.yaml"
+num-steps: -1
+store-data: false
