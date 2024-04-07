@@ -16,6 +16,13 @@ namespace Ecosim
         virtual void Step() = 0;
         virtual ~Simulatable() {}
     };
+
+    class Collidable
+    {
+    public:
+        virtual bool Collides(Collidable *other);
+        virtual ~Collidable(){};
+    };
 };
 
 #endif /* INTERFACES_H */

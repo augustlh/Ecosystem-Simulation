@@ -44,6 +44,7 @@ namespace Ecosim
         static void Circle(const Vector2<int> &pos, int r, Color color);
         static void Line(int x0, int y0, int x1, int y1, int size, Color color);
         static void Line(const Vector2<int> &pos0, const Vector2<int> &pos1, int size, Color color);
+        static void Line(const Vector2<float> &pos0, const Vector2<float> &pos1, int size, Color color);
         static void Surface(int x, int y, SDL_Surface *surface);
         static void Surface(const Vector2<int> &pos, SDL_Surface *surface);
     };

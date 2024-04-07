@@ -1,7 +1,7 @@
 generation:
     seed: 0
     smoothness: 0.003
-    water-level: 0.65
+    water-level: 0.5
     map-width: 800
     map-height: 800
     num-biomes: 50

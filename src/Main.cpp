@@ -5,7 +5,7 @@ int main(void)
 {
     try
     {
-        Ecosim::Simulation simulation("C:/dev/projects/Ecosystem-Simulation/configs/simulations/firstSim.yaml");
+        Ecosim::Simulation simulation("C:/Users/August/Desktop/Ecosystem-Simulation/configs/simulations/firstSim.yaml");
         simulation.Simulate(/*render fps, simulate fps*/);
     }
     catch (const std::exception &e)

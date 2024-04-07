@@ -69,6 +69,7 @@ namespace Ecosim
     }
 
     void Renderer::Line(const Vector2<int> &pos0, const Vector2<int> &pos1, int size, Color color) { Line(pos0.x, pos0.y, pos1.x, pos1.y, size, color); }
+    void Renderer::Line(const Vector2<float> &pos0, const Vector2<float> &pos1, int size, Color color) { Line(static_cast<int>(pos0.x), static_cast<int>(pos0.y), static_cast<int>(pos1.x), static_cast<int>(pos1.y), size, color); }
     void Renderer::Line(int x0, int y0, int x1, int y1, int size, Color color)
     {
         // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm

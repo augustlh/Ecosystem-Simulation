@@ -5,6 +5,7 @@
 #include "Map.h"
 #include "Exceptions.h"
 #include "Camera.h"
+#include "QuadTree.h"
 
 #include <MiniYaml/Yaml.hpp>
 
@@ -151,6 +152,19 @@ namespace Ecosim
         SDL_Event sdlEvent;
         bool shouldClose = false;
 
+        // Quad tree testing. Slet senere, når alt virker.
+        std::vector<Vector2<int>> points;
+        for (int i = 0; i < 1000; ++i)
+            points.push_back(Vector2<int>(std::rand() % 800, std::rand() % 800));
+
+        Node boundary(Vector2<int>(400, 400), 800);
+        QuadTree qt(boundary, 2);
+
+        for (const auto &point : points)
+            qt.Insert(point);
+
+        // End of quad tree testing. Slet senere, når alt virker.
+
         while (!shouldClose)
         {
             while (SDL_PollEvent(&sdlEvent))
@@ -172,9 +186,13 @@ namespace Ecosim
             Renderer::Background(Color(51, 77, 102));
             Map::Render();
             Renderer::Circle(80, 100, 50, Color(180, 80, 150));
+            for (const auto &point : points)
+                Renderer::Rect(point, Vector2<int>(2, 2), Color(255, 255, 255));
 
             for (const auto &renderable : renderables)
                 renderable->Draw();
+
+            qt.Render();
 
             Renderer::RenderFrame();
         }
