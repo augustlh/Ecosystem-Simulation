@@ -20,7 +20,8 @@ namespace Ecosim
     class Collidable
     {
     public:
-        virtual bool Collides(Collidable *other);
+        virtual bool Collides(Collidable &other) = 0;
+        virtual Vector2<float> getPos() = 0;
         virtual ~Collidable(){};
     };
 };
