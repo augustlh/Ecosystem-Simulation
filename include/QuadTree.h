@@ -109,10 +109,10 @@ namespace Ecosim
          * @param range The range to query
          * @param found The vector to store the found items
          */
-        void Query(Vector2<int> range, std::vector<T> &found)
+        void Query(Vector2<int> pos, int width, std::vector<T> &found)
         {
             // Check if the range intersects with the boundary of the current node
-            if (range.x + range.y < boundary.center.x - boundary.width / 2 || range.x - range.y > boundary.center.x + boundary.width / 2 || range.y + range.x < boundary.center.y - boundary.width / 2 || range.y - range.x > boundary.center.y + boundary.width / 2)
+            if (pos.x + width < boundary.center.x - boundary.width / 2 || pos.x - width > boundary.center.x + boundary.width / 2 || pos.y + width < boundary.center.y - boundary.width / 2 || pos.y - width > boundary.center.y + boundary.width / 2)
             {
                 return;
             }
@@ -132,7 +132,7 @@ namespace Ecosim
                 {
                     if (quadrant != nullptr)
                     {
-                        quadrant->Query(range, found);
+                        quadrant->Query(pos, width, found);
                     }
                 }
             }

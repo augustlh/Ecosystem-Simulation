@@ -161,11 +161,14 @@ namespace Ecosim
         for (const auto &collidable : collidables)
             collideableQuadTree.Insert(collidable.get());
 
-        // try to query the quadtree for items within a given range and store the found items in a vector
         std::vector<Collidable *> found;
-        collideableQuadTree.Query(Vector2<int>(400, 400), found);
+        collideableQuadTree.Query(Vector2<int>(400, 400), 800, found);
+
+        Node abe(Vector2<int>(400, 400), 800);
 
         SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Found %d items", found.size());
+
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "True size of collidables: %d", collidables.size());
 
         // End of quad tree testing. Slet senere, når alt virker.
 
@@ -197,7 +200,8 @@ namespace Ecosim
             for (const auto &collidable : collidables)
                 collideableQuadTree.Insert(collidable.get());
 
-            collideableQuadTree.Render();
+            // collideableQuadTree.Render();
+            abe.Render();
 
             Renderer::RenderFrame();
         }
