@@ -139,24 +139,11 @@ namespace Ecosim
 
     void Simulation::Simulate()
     {
-        // std::shared_ptr<GreenRenderable> obj1 = std::make_shared<GreenRenderable>();
-        // std::shared_ptr<RedRenderable> obj2 = std::make_shared<RedRenderable>();
-
-        // std::shared_ptr<Agent> agent = std::make_shared<Agent>(Vector2<float>(400.0f, 400.0f));
-
-        // std::vector<std::shared_ptr<Renderable>> renderables;
-        // renderables.push_back(obj1);
-        // renderables.push_back(obj2);
-
-        // std::vector<std::shared_ptr<Simulatable>> simulatables;
-        // simulatables.push_back(obj1);
-        // simulatables.push_back(obj2);
-
         std::vector<std::shared_ptr<Renderable>> renderables;
         std::vector<std::shared_ptr<Simulatable>> simulatables;
         std::vector<std::shared_ptr<Collidable>> collidables;
 
-        for (int i = 0; i < 100; ++i)
+        for (int i = 0; i < 200; ++i)
         {
             std::shared_ptr<Agent> agent = std::make_shared<Agent>(Vector2<float>(std::rand() % 800, std::rand() % 800));
             renderables.push_back(agent);
@@ -168,15 +155,17 @@ namespace Ecosim
         bool shouldClose = false;
 
         // Quad tree testing. Slet senere, når alt virker.
-        std::vector<Vector2<int>> points;
-        for (int i = 0; i < 1000; ++i)
-            points.push_back(Vector2<int>(std::rand() % 800, std::rand() % 800));
 
-        Node boundary(Vector2<int>(400, 400), 800);
-        QuadTree qt(boundary, 2);
+        QuadTree<Collidable *> collideableQuadTree(Node(Vector2<int>(400, 400), 800), 5);
 
-        for (const auto &point : points)
-            qt.Insert(point);
+        for (const auto &collidable : collidables)
+            collideableQuadTree.Insert(collidable.get());
+
+        // try to query the quadtree for items within a given range and store the found items in a vector
+        std::vector<Collidable *> found;
+        collideableQuadTree.Query(Vector2<int>(400, 400), found);
+
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Found %d items", found.size());
 
         // End of quad tree testing. Slet senere, når alt virker.
 
@@ -200,14 +189,15 @@ namespace Ecosim
 
             Renderer::Background(Color(51, 77, 102));
             Map::Render();
-            // Renderer::Circle(80, 100, 50, Color(180, 80, 150));
-            // for (const auto &point : points)
-            //     Renderer::Rect(point, Vector2<int>(2, 2), Color(255, 255, 255));
-
             for (const auto &renderable : renderables)
                 renderable->Draw();
 
-            // qt.Render();
+            // Please rebuild the quadtree to reflect the fact the agents have moved
+            collideableQuadTree.Clear();
+            for (const auto &collidable : collidables)
+                collideableQuadTree.Insert(collidable.get());
+
+            collideableQuadTree.Render();
 
             Renderer::RenderFrame();
         }
