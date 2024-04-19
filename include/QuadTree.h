@@ -3,34 +3,37 @@
 
 #include "Vector2.h"
 #include "Renderer.h"
+
 #include <vector>
 #include <memory>
 
 namespace Ecosim
 {
-
     class Node
     {
     public:
-        Node(Vector2<int> _center, int _width)
-            : center(_center), width(_width) {}
+        Node(const Vector2<int> _pos, int _width) : pos(_pos), width(_width) {}
         ~Node() {}
 
-        float width;
-        Vector2<int> center;
+        const Vector2<int> pos;
+        const int width;
 
-        bool contains(Vector2<int> point)
+        bool Contains(Vector2<float> &point)
         {
-            return center.x - width / 2 <= point.x && center.x + width / 2 >= point.x && center.y - width / 2 <= point.y && center.y + width / 2 >= point.y;
+            return pos.x - width / 2 <= point.x && pos.x + width / 2 >= point.x && pos.y - width / 2 <= point.y && pos.y + width / 2 >= point.y;
         }
+        bool IntersectsNode(Node &other)
+        {
+            return pos.x - width / 2 <= other.pos.x + other.width / 2 && pos.x + width / 2 >= other.pos.x - other.width / 2 && pos.y - width / 2 <= other.pos.y + other.width / 2 && pos.y + width / 2 >= other.pos.y - other.width / 2;
+        }
+
         void Render()
         {
-
-            Vector2<float> halfSize(width / 2, width / 2);
-            Vector2<float> topLeft(center.x - halfSize.x, center.y - halfSize.y);
-            Vector2<float> topRight(center.x + halfSize.x, center.y - halfSize.y);
-            Vector2<float> bottomLeft(center.x - halfSize.x, center.y + halfSize.y);
-            Vector2<float> bottomRight(center.x + halfSize.x, center.y + halfSize.y);
+            Vector2<float> halfSize(static_cast<float>(width) / 2, static_cast<float>(width) / 2);
+            Vector2<float> topLeft(pos.x - halfSize.x, pos.y - halfSize.y);
+            Vector2<float> topRight(pos.x + halfSize.x, pos.y - halfSize.y);
+            Vector2<float> bottomLeft(pos.x - halfSize.x, pos.y + halfSize.y);
+            Vector2<float> bottomRight(pos.x + halfSize.x, pos.y + halfSize.y);
 
             Renderer::Line(topLeft, topRight, 1, Color(255, 255, 255));
             Renderer::Line(topRight, bottomRight, 1, Color(255, 255, 255));
@@ -43,132 +46,131 @@ namespace Ecosim
     class QuadTree
     {
     public:
-        QuadTree(Node _boundary, unsigned int _QT_DEPTH)
-            : boundary(_boundary), depth(_QT_DEPTH), quadrants(4, nullptr) {}
+        QuadTree(Node &_boundary, const int _MAX_ITEMS) : boundary(_boundary), MAX_ITEMS(_MAX_ITEMS), children(4)
+        {
+        }
         ~QuadTree() {}
 
-        int depth;
-        int MAX_ITEMS = 4;
-
         Node boundary;
-        std::vector<std::shared_ptr<QuadTree<T>>> quadrants;
+        const int MAX_ITEMS;
+        std::vector<std::unique_ptr<QuadTree<T>>> children;
         std::vector<T> data;
 
-        /**
-         * @brief Subdivide the current node into 4 quadrants
-         */
-        void Subdivide()
+        bool Insert(const T &item)
         {
-            // Calculates the new width
-            float w = boundary.width / 2;
+            // If the item is not within the boundary of the current node, return false
+            if (!boundary.Contains(item->getPos()))
+            {
+                return false;
+            }
 
-            // Calculates the position of the topLeft quadrant
-            Vector2<int> nw = Vector2<int>(boundary.center.x - w / 2, boundary.center.y - w / 2);
-
-            // Creates new child nodes (quadrants) using smart pointers
-            quadrants[0] = std::make_shared<QuadTree<T>>(Node(nw, w), depth);
-            quadrants[1] = std::make_shared<QuadTree<T>>(Node(Vector2<int>(nw.x + w, nw.y), w), depth - 1);
-            quadrants[2] = std::make_shared<QuadTree<T>>(Node(Vector2<int>(nw.x, nw.y + w), w), depth - 1);
-            quadrants[3] = std::make_shared<QuadTree<T>>(Node(Vector2<int>(nw.x + w, nw.y + w), w), depth - 1);
-        }
-
-        /**
-         * @brief Insert an item into the quadtree
-         * @param item The item to insert
-         */
-        void Insert(const T &item)
-        {
-            // If the current node has less than MAX_ITEMS or the depth is 0, insert the item and return
-            if (data.size() < MAX_ITEMS || depth == 0)
+            // If the current node has less than MAX_ITEMS and no children, insert the item and return true
+            if (data.size() < MAX_ITEMS && children[0] == 0)
             {
                 data.push_back(item);
-                return;
+                return true;
             }
-            else
-            {
-                // If the quadrants are not initialized, subdivide the current node
-                if (quadrants[0] == nullptr)
-                {
-                    Subdivide();
-                }
 
-                // Insert the item into the quadrant that contains the item
-                for (auto &quadrant : quadrants)
-                {
-                    if (quadrant != nullptr && quadrant->boundary.contains(item->getPos().Convert<int>()))
-                    {
-                        quadrant->Insert(item);
-                        return;
-                    }
-                }
+            // Else if the current node has less than MAX_ITEMS and has children, insert the item into the children
+            if (children[0] == nullptr)
+            {
+                Subdivide();
             }
+
+            // Insert the item into the children
+            if (children[0]->Insert(item))
+                return true;
+            if (children[1]->Insert(item))
+                return true;
+            if (children[2]->Insert(item))
+                return true;
+            if (children[3]->Insert(item))
+                return true;
+
+            // std::cout << "Error: Could not insert item into any of the children" << std::endl;
+            // // Print the item's position for debugging
+            // std::cout << "Item position: " << item->getPos().x << ", " << item->getPos().y << std::endl;
+            // draw a red line to the item
+
+            return false;
         }
 
-        /**
-         * @brief Query the quadtree for items within a given range
-         * @param range The range to query
-         * @param found The vector to store the found items
-         */
-        void Query(Vector2<int> pos, int width, std::vector<T> &found)
+        void Subdivide()
         {
-            // Check if the range intersects with the boundary of the current node
-            if (pos.x + width < boundary.center.x - boundary.width / 2 || pos.x - width > boundary.center.x + boundary.width / 2 || pos.y + width < boundary.center.y - boundary.width / 2 || pos.y - width > boundary.center.y + boundary.width / 2)
+            // Calculate the new width
+            int w = boundary.width / 2;
+
+            // Calculate the position of the topLeft quadrant
+            Vector2<int> nw = Vector2<int>(boundary.pos.x - w / 2, boundary.pos.y - w / 2);
+
+            // Create new child nodes (quadrants) using smart pointers
+            children[0] = std::make_unique<QuadTree<T>>(Node(nw, w), MAX_ITEMS);
+            children[1] = std::make_unique<QuadTree<T>>(Node(Vector2<int>(nw.x + w, nw.y), w), MAX_ITEMS);
+            children[2] = std::make_unique<QuadTree<T>>(Node(Vector2<int>(nw.x, nw.y + w), w), MAX_ITEMS);
+            children[3] = std::make_unique<QuadTree<T>>(Node(Vector2<int>(nw.x + w, nw.y + w), w), MAX_ITEMS);
+
+            // Insert the data of the "father" into the children
+            for (auto &item : data)
             {
-                return;
+                if (children[0]->Insert(item))
+                    continue;
+                if (children[1]->Insert(item))
+                    continue;
+                if (children[2]->Insert(item))
+                    continue;
+                if (children[3]->Insert(item))
+                    continue;
             }
 
-            // If the current node is a leaf node (a region that can't be subdivided further), add all items to the found vector
-            if (quadrants[0] == nullptr)
-            {
-                for (const auto &item : data)
-                {
-                    found.push_back(item);
-                }
-            }
-            else
-            {
-                // Recursively query the child nodes (quadrants) for items within the range
-                for (const auto &quadrant : quadrants)
-                {
-                    if (quadrant != nullptr)
-                    {
-                        quadrant->Query(pos, width, found);
-                    }
-                }
-            }
+            // Clear the data of the "father"
+            data.clear();
         }
 
-        /**
-         * @brief Renders the quadtree
-         */
+        void Query(Node &range, std::vector<T> &found)
+        {
+            // If the boundary of the current node does not intersect with the range, return
+            if (!boundary.IntersectsNode(range))
+                return;
+
+            // If the boundary of the current node is contained within the range, add all data to the found vector
+            for (auto &item : data)
+            {
+                if (range.Contains(item->getPos()))
+                    found.push_back(item);
+            }
+
+            // If the current node has children, query the children
+            if (children[0] == nullptr)
+                return;
+
+            children[0]->Query(range, found);
+            children[1]->Query(range, found);
+            children[2]->Query(range, found);
+            children[3]->Query(range, found);
+        }
+
         void Render()
         {
-            // Render the boundary of the current node
             boundary.Render();
 
-            // Recursively render the child nodes (quadrants)
-            for (const auto &quadrant : quadrants)
+            for (auto &child : children)
             {
-                if (quadrant != nullptr)
-                {
-                    quadrant->Render();
-                }
+                if (child != nullptr)
+                    child->Render();
             }
         }
 
-        /**
-         * @brief Clears the quadtree
-         */
         void Clear()
         {
             data.clear();
-            for (auto &quadrant : quadrants)
+            for (auto &child : children)
             {
-                if (quadrant != nullptr)
-                {
-                    quadrant->Clear();
-                }
+                if (child != nullptr)
+                    child->Clear();
             }
+
+            children.clear();
+            children.resize(4);
         }
     };
 }

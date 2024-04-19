@@ -18,6 +18,18 @@ namespace Ecosim
         // random walk
         m_Pos.x += ((std::rand() % 11) - 5) * 0.1;
         m_Pos.y += ((std::rand() % 11) - 5) * 0.1;
+
+        // m_Pos.x = static_cast<int>((m_Pos.x + 800.0f)) % 800;
+        // m_Pos.y = static_cast<int>((m_Pos.y + 800.0f)) % 800;
+
+        if (m_Pos.x < 0)
+            m_Pos.x = 800;
+        else if (m_Pos.x > 800)
+            m_Pos.x = 0;
+        if (m_Pos.y < 0)
+            m_Pos.y = 800;
+        else if (m_Pos.y > 800)
+            m_Pos.y = 0;
     }
 
     bool Agent::Collides(Collidable &other)

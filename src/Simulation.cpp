@@ -5,8 +5,8 @@
 #include "Map.h"
 #include "Exceptions.h"
 #include "Camera.h"
-#include "QuadTree.h"
 #include "Agent.h"
+#include "QuadTree.h"
 
 #include <MiniYaml/Yaml.hpp>
 
@@ -143,7 +143,7 @@ namespace Ecosim
         std::vector<std::shared_ptr<Simulatable>> simulatables;
         std::vector<std::shared_ptr<Collidable>> collidables;
 
-        for (int i = 0; i < 200; ++i)
+        for (int i = 0; i < 100; ++i)
         {
             std::shared_ptr<Agent> agent = std::make_shared<Agent>(Vector2<float>(std::rand() % 800, std::rand() % 800));
             renderables.push_back(agent);
@@ -156,20 +156,28 @@ namespace Ecosim
 
         // Quad tree testing. Slet senere, når alt virker.
 
-        QuadTree<Collidable *> collideableQuadTree(Node(Vector2<int>(400, 400), 800), 5);
+        Node root(Vector2<int>(400, 400), 800);
+        Node range(Vector2<int>(400, 400), 800);
 
-        for (const auto &collidable : collidables)
-            collideableQuadTree.Insert(collidable.get());
+        int count = 0;
+        for (auto &collidable : collidables)
+        {
+            if (root.Contains(collidable->getPos()))
+                count++;
+        }
+
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Number of agents in root: %d", count);
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Does root and range intersect?: %d", root.IntersectsNode(range));
+
+        QuadTree<Collidable *> quadTree(root, 1);
+
+        for (auto &collidable : collidables)
+            quadTree.Insert(collidable.get());
 
         std::vector<Collidable *> found;
-        collideableQuadTree.Query(Vector2<int>(400, 400), 800, found);
+        quadTree.Query(root, found);
 
-        Node abe(Vector2<int>(400, 400), 800);
-
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Found %d items", found.size());
-
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "True size of collidables: %d", collidables.size());
-
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Number of agents in range: %d", found.size());
         // End of quad tree testing. Slet senere, når alt virker.
 
         while (!shouldClose)
@@ -190,18 +198,20 @@ namespace Ecosim
             for (const auto &simulatable : simulatables)
                 simulatable->Step(/*delta time*/);
 
+            quadTree.Clear();
+
+            for (auto &collidable : collidables)
+                quadTree.Insert(collidable.get());
+
             Renderer::Background(Color(51, 77, 102));
             Map::Render();
             for (const auto &renderable : renderables)
                 renderable->Draw();
 
-            // Please rebuild the quadtree to reflect the fact the agents have moved
-            collideableQuadTree.Clear();
-            for (const auto &collidable : collidables)
-                collideableQuadTree.Insert(collidable.get());
+            root.Render();
+            range.Render();
 
-            // collideableQuadTree.Render();
-            abe.Render();
+            quadTree.Render();
 
             Renderer::RenderFrame();
         }
