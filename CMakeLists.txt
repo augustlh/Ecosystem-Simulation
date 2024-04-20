@@ -22,6 +22,7 @@ set(HEADERS
     "include/Map.h"
     "include/Renderer.h"
     "include/Simulation.h"
+    "include/Statistics.h"
     "include/Vector2.h"
     "include/Window.h"
 )
