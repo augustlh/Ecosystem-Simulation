@@ -16,7 +16,7 @@ namespace Ecosim
     public:
         Camera() = delete;
 
-        static void SetViewport(Vector2<float> &viewport);
+        static void SetViewport(const Vector2<float> &viewport);
 
         static void SetPosition(const Vector2<float> &pos);
         static void MovePosition(const Vector2<float> &move);

@@ -7,7 +7,7 @@ namespace Ecosim
     Vector2<float> Camera::m_viewport{};
     float Camera::m_zoom = 1.0f;
 
-    void Camera::SetViewport(Vector2<float> &viewport) { m_viewport = viewport; }
+    void Camera::SetViewport(const Vector2<float> &viewport) { m_viewport = viewport; }
 
     void Camera::SetPosition(const Vector2<float> &pos) { m_position = pos; }
     void Camera::MovePosition(const Vector2<float> &move) { m_position += move; }

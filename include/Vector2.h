@@ -42,7 +42,7 @@ namespace Ecosim
         template <typename R>
         Vector2<R> Convert() const { return Vector2<R>(static_cast<R>(x), static_cast<R>(y)); }
 
-        float Magnitude() const { return std::sqrtf(x * x + y * y); }
+        float Magnitude() const { return std::sqrt(x * x + y * y); }
 
         /**
          * @brief Vector-vector addition, returning a new Vector2<T> object
