@@ -32,7 +32,7 @@ namespace Ecosim
     public:
         Simulation(std::string &configPath);
         Simulation(const char *configPath);
-        void Simulate();
+        void Simulate(int fps);
     };
 }
 

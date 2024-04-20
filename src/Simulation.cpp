@@ -126,8 +126,6 @@ namespace Ecosim
         Camera::SetViewport(Vector2<float>(800.0f, 800.0f));
         Camera::SetZoom(0.25f);
 
-        SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
-
         SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
                     "Started simulation: '%s'\n  - Number of agents: %d\n  - Number of food:   %d\n  - Enviroment:       '%s'",
                     m_config.name.c_str(), m_config.numAgents, m_config.numFood, m_config.enviromentConfigPath.c_str());
@@ -135,24 +133,24 @@ namespace Ecosim
         Map::Create(m_config.enviromentConfigPath);
     }
 
-    void Simulation::Simulate()
+    void Simulation::Simulate(int fps)
     {
-        std::shared_ptr<GreenRenderable> obj1 = std::make_shared<GreenRenderable>();
-        std::shared_ptr<RedRenderable> obj2 = std::make_shared<RedRenderable>();
+        // std::vector<std::shared_ptr<Renderable>> renderables;
+        // std::vector<std::shared_ptr<Simulatable>> simulatables;
 
-        std::vector<std::shared_ptr<Renderable>> renderables;
-        renderables.push_back(obj1);
-        renderables.push_back(obj2);
+        uint64_t thisFrame = SDL_GetPerformanceCounter(), lastFrame = 0;
+        double deltaTime = 0;
 
-        std::vector<std::shared_ptr<Simulatable>> simulatables;
-        simulatables.push_back(obj1);
-        simulatables.push_back(obj2);
+        uint64_t lastDisplayed = thisFrame;
+        uint64_t displayInterval = 1000 / fps;
 
         SDL_Event sdlEvent;
         bool shouldClose = false;
 
         while (!shouldClose)
         {
+            std::cout << "tick" << std::endl;
+
             while (SDL_PollEvent(&sdlEvent))
             {
                 switch (sdlEvent.type)
@@ -160,23 +158,34 @@ namespace Ecosim
                 case SDL_EVENT_QUIT:
                     shouldClose = true;
                     break;
-                case SDL_EVENT_KEY_UP:
+                case SDL_EVENT_KEY_UP: // FIXME:
                     handleKeyRelease(sdlEvent.key);
                     break;
                 }
             }
 
-            for (const auto &simulatable : simulatables)
-                simulatable->Step(/*delta time*/);
+            lastFrame = thisFrame;
+            thisFrame = SDL_GetPerformanceCounter();
+            deltaTime = ((thisFrame - lastFrame) * 1000 / (double)SDL_GetPerformanceFrequency());
+
+            // for (const auto &simulatable : simulatables)
+            //     simulatable->Step(deltaTime);
+
+            // if (thisFrame - lastDisplayed >= displayInterval)
+            // {
+            //     lastDisplayed = thisFrame;
 
             Renderer::Background(Color(51, 77, 102));
             Map::Render();
             Renderer::Circle(80, 100, 50, Color(180, 80, 150));
 
-            for (const auto &renderable : renderables)
-                renderable->Draw();
+            std::cout << "Display" << std::endl;
+
+            // for (const auto &renderable : renderables)
+            //     renderable->Draw();
 
             Renderer::RenderFrame();
+            // }
         }
 
         Map::Cleanup();
