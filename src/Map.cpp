@@ -57,7 +57,7 @@ namespace Ecosim
         }
 
         if (biomes.size() == 0)
-            biomes.emplace_back(Biome("Default biome", 1.0f, Color::FromHex("#9b57aa")));
+            biomes.emplace_back(Biome("Default biome", 1.0f, Color::FromHex("#72ad5d")));
 
         return biomes;
     }
@@ -77,10 +77,10 @@ namespace Ecosim
 
         seed = generation["seed"].As<uint>(0);
         smoothness = generation["smoothness"].As<float>(0.005f);
-        waterLevel = generation["water-level"].As<float>(0.6f);
-        mapWidth = generation["map-width"].As<uint>(100);
-        mapHeight = generation["map-height"].As<uint>(100);
-        numBiomes = generation["num-biomes"].As<uint>(25);
+        waterLevel = generation["water-level"].As<float>(0.5f);
+        mapWidth = generation["map-width"].As<uint>(800);
+        mapHeight = generation["map-height"].As<uint>(800);
+        numBiomes = generation["num-biomes"].As<uint>(1);
 
         biomes = GenerateBiomeTypes(root["biomes"]);
 

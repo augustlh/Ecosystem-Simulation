@@ -56,7 +56,7 @@ namespace Ecosim
         ECOSIM_CATCH_AND_CALL(Yaml::OperationException & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Invalid filepath to yaml source: '%s'", configPath))
         ECOSIM_CATCH_AND_CALL(std::exception & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to open and read yaml source: '%s'\n%s", configPath, e.what()))
 
-        name = root["simulation-name"].As<std::string>("Ecosim");
+        name = root["simulation-name"].As<std::string>("Unnamed simulation");
         numAgents = root["num-agents"].As<uint>(100);
         numFood = root["total-food"].As<uint>(100);
         enviromentConfigPath = root["enviroment"].As<std::string>("<no enviroment>");
