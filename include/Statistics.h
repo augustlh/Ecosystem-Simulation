@@ -38,6 +38,7 @@ struct DataPoint
         case NumberType::Int:
             return sizeof(int);
         }
+        return 0;
     }
 };
 
@@ -69,6 +70,9 @@ public:
 
     static void Export(const std::string &basename)
     {
+        if (MemorySize() == 0)
+            return;
+
         time_point start = std::chrono::steady_clock::now();
 
         std::string filename = basename + std::to_string(m_fileCounter) + ".txt";

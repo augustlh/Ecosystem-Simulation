@@ -12,61 +12,8 @@
 #include <vector>
 #include <memory>
 
-class GreenRenderable : public Ecosim::Renderable, public Ecosim::Simulatable
-{
-private:
-    Ecosim::Color m_color;
-    Ecosim::Vector2<int> m_center;
-    Ecosim::Vector2<int> m_velocity;
-    int m_radius;
-
-public:
-    GreenRenderable() : m_color(0, 200, 80), m_center(120, 200), m_velocity(0), m_radius(40) {}
-
-    void Draw() override
-    {
-        Ecosim::Vector2<int> direction(m_velocity.x * m_radius + 10, m_velocity.y * m_radius + 10);
-        Ecosim::Renderer::Line(m_center, m_center + direction, 2, m_color);
-        Ecosim::Renderer::Circle(m_center, m_radius, m_color);
-    }
-
-    void Step() override
-    {
-        m_velocity.x = (std::rand() % 11) - 5;
-        m_velocity.y = (std::rand() % 11) - 5;
-
-        m_center.x += m_velocity.x;
-        m_center.y += m_velocity.y;
-    }
-};
-
-class RedRenderable : public Ecosim::Renderable, public Ecosim::Simulatable
-{
-private:
-    Ecosim::Color m_color;
-    Ecosim::Vector2<int> m_center;
-    Ecosim::Vector2<int> m_velocity;
-    int m_radius;
-
-public:
-    RedRenderable() : m_color(200, 80, 0), m_center(300, 200), m_velocity(0), m_radius(60) {}
-
-    void Draw() override
-    {
-        Ecosim::Vector2<int> direction(m_velocity.x * m_radius + 10, m_velocity.y * m_radius + 10);
-        Ecosim::Renderer::Line(m_center, m_center + direction, 2, m_color);
-        Ecosim::Renderer::Circle(m_center, m_radius, m_color);
-    }
-
-    void Step() override
-    {
-        m_velocity.x = (std::rand() % 11) - 5;
-        m_velocity.y = (std::rand() % 11) - 5;
-
-        m_center.x += m_velocity.x;
-        m_center.y += m_velocity.y;
-    }
-};
+#include "AgentStuff.h"
+#include "Statistics.h"
 
 void handleKeyRelease(SDL_KeyboardEvent &keyEvent)
 {
@@ -117,7 +64,6 @@ namespace Ecosim
         storeData = root["store-data"].As<bool>(false);
     }
 
-    Simulation::Simulation(std::string &configPath) { Simulation(configPath.c_str()); }
     Simulation::Simulation(const char *configPath)
     {
         m_config = SimulationConfig(configPath);
@@ -133,24 +79,44 @@ namespace Ecosim
         Map::Create(m_config.enviromentConfigPath);
     }
 
-    void Simulation::Simulate(int fps)
+    void Simulation::Simulate(uint fps)
     {
-        // std::vector<std::shared_ptr<Renderable>> renderables;
-        // std::vector<std::shared_ptr<Simulatable>> simulatables;
+        std::vector<std::shared_ptr<Renderable>> renderables;
+        std::vector<std::shared_ptr<Simulatable>> simulatables;
 
-        uint64_t thisFrame = SDL_GetPerformanceCounter(), lastFrame = 0;
-        double deltaTime = 0;
+        for (int i = 0; i < 100; ++i)
+        {
+            Temp::Agent a{};
+            std::shared_ptr<Temp::Agent> ptr = std::make_shared<Temp::Agent>(a);
 
-        uint64_t lastDisplayed = thisFrame;
-        uint64_t displayInterval = 1000 / fps;
+            renderables.emplace_back(ptr);
+            simulatables.emplace_back(ptr);
+        }
+
+        for (int i = 0; i < 100; ++i)
+        {
+            Temp::Food f{};
+            renderables.emplace_back(std::make_shared<Temp::Food>(f));
+
+            Statistics::Report("Food_X", f.pos.x);
+            Statistics::Report("Food_Y", f.pos.y);
+
+            // if (Statistics::MemorySize() >= 200)
+            //     Statistics::Export("FoodData");
+        }
+
+        uint64_t thisFrame = SDL_GetTicks(), lastFrame = 0;
+
+        bool limitDisplay = fps > 0;
+
+        uint64_t lastDisplayed = 0;
+        uint64_t displayInterval = limitDisplay ? 1000 / fps : 0;
 
         SDL_Event sdlEvent;
         bool shouldClose = false;
 
         while (!shouldClose)
         {
-            std::cout << "tick" << std::endl;
-
             while (SDL_PollEvent(&sdlEvent))
             {
                 switch (sdlEvent.type)
@@ -165,29 +131,29 @@ namespace Ecosim
             }
 
             lastFrame = thisFrame;
-            thisFrame = SDL_GetPerformanceCounter();
-            deltaTime = ((thisFrame - lastFrame) * 1000 / (double)SDL_GetPerformanceFrequency());
+            thisFrame = SDL_GetTicks();
 
-            // for (const auto &simulatable : simulatables)
-            //     simulatable->Step(deltaTime);
+            double deltaTime = (thisFrame - lastFrame) * 0.001;
 
-            // if (thisFrame - lastDisplayed >= displayInterval)
-            // {
-            //     lastDisplayed = thisFrame;
+            for (const auto &simulatable : simulatables)
+                simulatable->Step(deltaTime);
 
-            Renderer::Background(Color(51, 77, 102));
-            Map::Render();
-            Renderer::Circle(80, 100, 50, Color(180, 80, 150));
+            if (!limitDisplay || thisFrame - lastDisplayed >= displayInterval)
+            {
+                lastDisplayed = thisFrame;
 
-            std::cout << "Display" << std::endl;
+                Renderer::Background(Color(51, 77, 102));
+                Map::Render();
+                Renderer::Circle(80, 100, 50, Color(180, 80, 150));
 
-            // for (const auto &renderable : renderables)
-            //     renderable->Draw();
+                for (const auto &renderable : renderables)
+                    renderable->Draw();
 
-            Renderer::RenderFrame();
-            // }
+                Renderer::RenderFrame();
+            }
         }
 
         Map::Cleanup();
+        // Statistics::Export("FoodData");
     }
 }

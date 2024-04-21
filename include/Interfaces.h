@@ -13,7 +13,7 @@ namespace Ecosim
     class Simulatable
     {
     public:
-        virtual void Step() = 0;
+        virtual void Step(double deltaTime) = 0;
         virtual ~Simulatable() {}
     };
 };

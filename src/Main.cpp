@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    std::string configPath = argv[1];
+    const char *configPath = argv[1];
     int renderFPS = 24;
 
     if (argc == 3)
