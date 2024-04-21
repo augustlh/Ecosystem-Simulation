@@ -1,26 +1,6 @@
 #ifndef MAP_H
 #define MAP_H
 
-/*
-
-Terrain generation
-    - Water level: 0..1
-    - Perlin noise smoothness: 0..1
-
-Food
-    - Number of food pallets: 0..n
-
-Biomes
-    - Temperature: -1..1 (cold..hot)
-    - Visibility multiplier: 0..2
-        Emulate difference between visibility in e.g. a savanna and a dense jungle
-    - Food attraction rate: 0..1
-        Food picks a random position on the map after it has been eaten or some amount of time has passed
-        If a random float in range 0..1 is larger than the enviroments food attraction rate the food spawns, otherwise a new position is picked
-    - Colorscheme: r,g,b-color
-
-*/
-
 #include <SDL3/SDL.h>
 #include <vector>
 #include <string>
@@ -50,7 +30,7 @@ namespace Ecosim
         std::vector<Biome> biomes;
 
         EnviromentConfig() = default;
-        EnviromentConfig(std::string &configPath);
+        EnviromentConfig(std::string &configPath) { EnviromentConfig(configPath.c_str()); }
         EnviromentConfig(const char *configPath);
     };
 
@@ -65,14 +45,14 @@ namespace Ecosim
     public:
         Map() = delete;
 
-        static void Create(std::string &configPath);
+        static void Create(std::string &configPath) { Create(configPath.c_str()); }
         static void Create(const char *configPath);
-        static void Cleanup();
+        static void Cleanup() { SDL_DestroySurface(m_surface); }
 
-        static void Render();
+        static void Render() { Renderer::Surface(0, 0, m_surface); }
 
-        static uint Width();
-        static uint Height();
+        static uint Width() { return m_config.mapWidth; }
+        static uint Height() { return m_config.mapHeight; }
 
         static Biome &BiomeAt(Vector2<int> coord);
         static float HeightAt(Vector2<int> coord);

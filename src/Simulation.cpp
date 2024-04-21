@@ -12,7 +12,7 @@
 #include <vector>
 #include <memory>
 
-#include "AgentStuff.h"
+#include "Removeme_AgentStuff.h"
 #include "Statistics.h"
 
 void handleKeyRelease(SDL_KeyboardEvent &keyEvent)
@@ -60,7 +60,7 @@ namespace Ecosim
         numAgents = root["num-agents"].As<uint>(100);
         numFood = root["total-food"].As<uint>(100);
         enviromentConfigPath = root["enviroment"].As<std::string>("<no enviroment>");
-        numSteps = root["num-steps"].As<uint>(100);
+        numSeconds = root["num-seconds"].As<uint>(0);
         storeData = root["store-data"].As<bool>(false);
     }
 
@@ -72,11 +72,11 @@ namespace Ecosim
         Camera::SetViewport(Vector2<float>(800.0f, 800.0f));
         Camera::SetZoom(0.25f);
 
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-                    "Started simulation: '%s'\n  - Number of agents: %d\n  - Number of food:   %d\n  - Enviroment:       '%s'",
-                    m_config.name.c_str(), m_config.numAgents, m_config.numFood, m_config.enviromentConfigPath.c_str());
-
         Map::Create(m_config.enviromentConfigPath);
+
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
+                    "Started simulation: '%s'\n  - Number of agents: %d\n  - Number of food:   %d\n  - Enviroment:       '%s'\n  - Runtime (sec):    %d\n  - Store data:       %s",
+                    m_config.name.c_str(), m_config.numAgents, m_config.numFood, m_config.enviromentConfigPath.c_str(), m_config.numSeconds, m_config.storeData ? "true" : "false");
     }
 
     void Simulation::Simulate(uint fps)
@@ -84,7 +84,7 @@ namespace Ecosim
         std::vector<std::shared_ptr<Renderable>> renderables;
         std::vector<std::shared_ptr<Simulatable>> simulatables;
 
-        for (int i = 0; i < 100; ++i)
+        for (int i = 0; i < m_config.numAgents; ++i)
         {
             Temp::Agent a{};
             std::shared_ptr<Temp::Agent> ptr = std::make_shared<Temp::Agent>(a);
@@ -93,7 +93,7 @@ namespace Ecosim
             simulatables.emplace_back(ptr);
         }
 
-        for (int i = 0; i < 100; ++i)
+        for (int i = 0; i < m_config.numFood; ++i)
         {
             Temp::Food f{};
             renderables.emplace_back(std::make_shared<Temp::Food>(f));
@@ -106,8 +106,10 @@ namespace Ecosim
         }
 
         uint64_t thisFrame = SDL_GetTicks(), lastFrame = 0;
+        uint64_t initFrame = thisFrame;
 
         bool limitDisplay = fps > 0;
+        bool limitRuntime = m_config.numSeconds > 0;
 
         uint64_t lastDisplayed = 0;
         uint64_t displayInterval = limitDisplay ? 1000 / fps : 0;
@@ -133,6 +135,9 @@ namespace Ecosim
             lastFrame = thisFrame;
             thisFrame = SDL_GetTicks();
 
+            if (limitRuntime && (thisFrame - initFrame) * 0.001 >= m_config.numSeconds)
+                shouldClose = true;
+
             double deltaTime = (thisFrame - lastFrame) * 0.001;
 
             for (const auto &simulatable : simulatables)
@@ -144,7 +149,13 @@ namespace Ecosim
 
                 Renderer::Background(Color(51, 77, 102));
                 Map::Render();
-                Renderer::Circle(80, 100, 50, Color(180, 80, 150));
+
+                // float mouseX, mouseY;
+                // SDL_GetMouseState(&mouseX, &mouseY);
+                // Vector2<int> coord = Camera::ViewportToWorld(Vector2<int>(mouseX, mouseY));
+                // bool water = Map::WaterAt(coord);
+                // Biome biome = Map::BiomeAt(coord);
+                // std::cout << "Mouse hovers over: water=" << water << ", biome=" << biome.name << ", coord=" << coord.x << "," << coord.y << std::endl;
 
                 for (const auto &renderable : renderables)
                     renderable->Draw();
@@ -154,6 +165,8 @@ namespace Ecosim
         }
 
         Map::Cleanup();
-        // Statistics::Export("FoodData");
+
+        if (m_config.storeData)
+            Statistics::Export("FoodData");
     }
 }

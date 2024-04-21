@@ -32,6 +32,9 @@ namespace Ecosim
         static float TranslateDistance(float dist);
         static SDL_Rect TranslateRect(const Vector2<int> &pos, const Vector2<int> &size) { return TranslateRect(pos.Convert<float>(), size.Convert<float>()); }
         static SDL_Rect TranslateRect(const Vector2<float> &pos, const Vector2<float> &size);
+
+        static Vector2<int> ViewportToWorld(const Vector2<int> &pos) { return ViewportToWorld(pos.Convert<float>()).Convert<int>(); }
+        static Vector2<float> ViewportToWorld(const Vector2<float> &pos);
     };
 }
 

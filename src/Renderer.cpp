@@ -5,6 +5,20 @@
 
 namespace Ecosim
 {
+    Color Color::FromHex(const std::string &hex)
+    {
+        std::stringstream ss(hex.substr(1));
+
+        uint32_t num = 0;
+        ss >> std::hex >> num;
+
+        uint8_t r = (num >> 16) & 0xff;
+        uint8_t g = (num >> 8) & 0xff;
+        uint8_t b = num & 0xff;
+
+        return Color(r, g, b);
+    }
+
     SDL_Window *Renderer::m_sdlWindow = nullptr;
     SDL_Surface *Renderer::m_sdlSurface = nullptr;
 

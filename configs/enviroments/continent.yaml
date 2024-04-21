@@ -1,0 +1,26 @@
+generation:
+    seed: 0
+    smoothness: 0.003
+    water-level: 0.3
+    map-width: 800
+    map-height: 800
+    num-biomes: 50
+
+biomes:
+    - name: grass
+      color: "#72ad5d"
+      probability: 0.6
+      visibility: 1.0
+      temperature: 0.5
+
+    - name: forest
+      color: "#3f6830"
+      probability: 0.5
+      visibility: 0.6
+      temperature: 0.5
+
+    - name: desert
+      color: "#b5ba6f"
+      probability: 0.2
+      visibility: 1.0
+      temperature: 1.0

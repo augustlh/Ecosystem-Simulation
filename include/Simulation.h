@@ -15,7 +15,7 @@ namespace Ecosim
         uint numAgents;
         uint numFood;
         std::string enviromentConfigPath;
-        uint numSteps;
+        uint numSeconds;
         bool storeData;
 
         SimulationConfig() = default;

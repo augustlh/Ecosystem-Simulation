@@ -3,7 +3,7 @@
 
 #include <SDL3/SDL.h>
 #include <cstdint>
-
+#include <sstream>
 #include "Vector2.h"
 
 typedef unsigned int uint;
@@ -19,6 +19,8 @@ namespace Ecosim
         Color(uint8_t _r, uint8_t _g, uint8_t _b) : r(_r), g(_g), b(_b) {}
 
         uint32_t Format(SDL_PixelFormat *format) { return SDL_MapRGB(format, r, g, b); }
+
+        static Color FromHex(const std::string &hex);
     };
 
     class Renderer
