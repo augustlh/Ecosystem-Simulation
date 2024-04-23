@@ -1,23 +1,39 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include <SDL3/SDL.h>
+#include "Ecosim.h"
 
 namespace Ecosim
 {
+    /// @brief An SDL_Window wrapper
     class Window
     {
     private:
+        /// @brief A pointer to the SDL_Window
         SDL_Window *m_window;
-        unsigned int m_width, m_height;
 
     public:
+        /// @brief A default `Window`-constuctor, which does not create a `SDL_Window`
         Window() = default;
-        Window(const char *title, unsigned int width, unsigned int height);
+
+        /// @brief Creates a `Window`-object and calls the `Create`-function
+        /// @param title The title of the window
+        /// @param width The width of the window
+        /// @param height The height of the window
+        Window(const char *title, uint width, uint height);
+
+        /// @brief Destroyes this window and quits SDL
         ~Window();
 
-        void Create(const char *title, unsigned int width, unsigned int height);
+        /// @brief Create the `SDL_Window`
+        /// @param title The title of the window
+        /// @param width The width of the window
+        /// @param height The height of the window
+        void Create(const char *title, uint width, uint height);
 
+        /// @brief Overloading the assignment operator
+        /// @param other The other window
+        /// @return A reference to this window
         Window &operator=(Window &&other);
     };
 }

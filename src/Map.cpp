@@ -1,6 +1,6 @@
 #include "Map.h"
 #include "Renderer.h"
-#include "Exceptions.h"
+#include "Ecosim.h"
 #include "Generation.h"
 
 #include <vector>
@@ -19,7 +19,7 @@ namespace Ecosim
         *pixelAddr = pixel;
     }
 
-    SDL_Surface *CreateMapTexture(uint width, uint height, const std::vector<float> &heightMap, const std::vector<uint> &biomeMap, const std::vector<Biome> &biomes, float waterLevel)
+    SDL_Surface *CreateMapTexture(uint width, uint height, const std::vector<float> &heightMap, const std::vector<uint> &biomeMap, const std::vector<BiomeType> &biomes, float waterLevel)
     {
         SDL_Surface *surface = Renderer::RequestSurface(width, height);
 
@@ -41,9 +41,9 @@ namespace Ecosim
         return surface;
     }
 
-    std::vector<Biome> GenerateBiomeTypes(Yaml::Node &biomesNode)
+    std::vector<BiomeType> GenerateBiomeTypes(Yaml::Node &biomesNode)
     {
-        std::vector<Biome> biomes;
+        std::vector<BiomeType> biomes;
 
         for (uint i = 0; i < biomesNode.Size(); ++i)
         {
@@ -53,11 +53,11 @@ namespace Ecosim
             float probability = item["probability"].As<float>(0.0f);
             Color color = Color::FromHex(item["color"].As<std::string>("#9b57aa"));
 
-            biomes.push_back(Biome(name, probability, color));
+            biomes.push_back(BiomeType(name, probability, color));
         }
 
         if (biomes.size() == 0)
-            biomes.emplace_back(Biome("Default biome", 1.0f, Color::FromHex("#72ad5d")));
+            biomes.emplace_back(BiomeType("Default biome", 1.0f, Color::FromHex("#72ad5d")));
 
         return biomes;
     }
@@ -120,7 +120,7 @@ namespace Ecosim
         m_surface = CreateMapTexture(width, height, m_heightMap, m_biomeMap, m_config.biomes, m_config.waterLevel);
     }
 
-    Biome &Map::BiomeAt(Vector2<int> coord)
+    BiomeType &Map::BiomeAt(Vector2<int> coord)
     {
         if (coord.x < 0 || coord.x >= Width() ||
             coord.y < 0 || coord.y >= Height())

@@ -65,7 +65,7 @@ namespace Ecosim::Generation
         return texture;
     }
 
-    std::vector<uint> DetailedVoronoi(uint width, uint height, uint numPoints, uint detailLayers = 1)
+    std::vector<uint> DetailedVoronoi(uint width, uint height, uint numPoints, uint detailLayers)
     {
         std::vector<uint> texture = std::move(Voronoi(width, height, numPoints));
 
@@ -90,7 +90,7 @@ namespace Ecosim::Generation
         return texture;
     }
 
-    std::vector<float> Perlin(uint width, uint height, float smoothness = 0.005f, int octaves = 4)
+    std::vector<float> Perlin(uint width, uint height, float smoothness, int octaves)
     {
         siv::PerlinNoise perlin(seed);
 

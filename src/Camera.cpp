@@ -17,7 +17,6 @@ namespace Ecosim
     {
         zoom = std::clamp(zoom, 0.125f, 8.0f);
 
-        // Vector2<float> displacement = (m_viewport / 2) * zoom + m_position - ((m_viewport / 2) * m_zoom + m_position);
         Vector2<float> displacement = m_viewport * ((zoom - m_zoom) / 2.0f);
         m_position -= displacement;
 

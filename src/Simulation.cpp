@@ -1,9 +1,9 @@
+#include "Ecosim.h"
 #include "Simulation.h"
 #include "Window.h"
 #include "Renderer.h"
 #include "Interfaces.h"
 #include "Map.h"
-#include "Exceptions.h"
 #include "Camera.h"
 
 #include <MiniYaml/Yaml.hpp>
@@ -15,7 +15,7 @@
 #include "Removeme_AgentStuff.h"
 #include "Statistics.h"
 
-void handleKeyRelease(SDL_KeyboardEvent &keyEvent)
+void HandleKeyRelease(SDL_KeyboardEvent &keyEvent)
 {
     Ecosim::Vector2<float> move{};
     switch (keyEvent.keysym.sym)
@@ -81,8 +81,22 @@ namespace Ecosim
 
     void Simulation::Simulate(uint fps)
     {
+        uint64_t thisFrame = SDL_GetTicks(), lastFrame = 0;
+        uint64_t initFrame = thisFrame;
+
+        bool limitDisplay = fps > 0;
+        bool limitRuntime = m_config.numSeconds > 0;
+
+        uint64_t lastDisplayed = 0;
+        uint64_t displayInterval = limitDisplay ? 1000 / fps : 0;
+
+        SDL_Event sdlEvent;
+        bool shouldClose = false;
+
         std::vector<std::shared_ptr<Renderable>> renderables;
         std::vector<std::shared_ptr<Simulatable>> simulatables;
+
+        Statistics::Initalize();
 
         for (int i = 0; i < m_config.numAgents; ++i)
         {
@@ -105,18 +119,6 @@ namespace Ecosim
             //     Statistics::Export("FoodData");
         }
 
-        uint64_t thisFrame = SDL_GetTicks(), lastFrame = 0;
-        uint64_t initFrame = thisFrame;
-
-        bool limitDisplay = fps > 0;
-        bool limitRuntime = m_config.numSeconds > 0;
-
-        uint64_t lastDisplayed = 0;
-        uint64_t displayInterval = limitDisplay ? 1000 / fps : 0;
-
-        SDL_Event sdlEvent;
-        bool shouldClose = false;
-
         while (!shouldClose)
         {
             while (SDL_PollEvent(&sdlEvent))
@@ -127,7 +129,7 @@ namespace Ecosim
                     shouldClose = true;
                     break;
                 case SDL_EVENT_KEY_UP: // FIXME:
-                    handleKeyRelease(sdlEvent.key);
+                    HandleKeyRelease(sdlEvent.key);
                     break;
                 }
             }
@@ -154,7 +156,7 @@ namespace Ecosim
                 // SDL_GetMouseState(&mouseX, &mouseY);
                 // Vector2<int> coord = Camera::ViewportToWorld(Vector2<int>(mouseX, mouseY));
                 // bool water = Map::WaterAt(coord);
-                // Biome biome = Map::BiomeAt(coord);
+                // BiomeType biome = Map::BiomeAt(coord);
                 // std::cout << "Mouse hovers over: water=" << water << ", biome=" << biome.name << ", coord=" << coord.x << "," << coord.y << std::endl;
 
                 for (const auto &renderable : renderables)

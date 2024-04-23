@@ -7,30 +7,20 @@ generation:
     num-biomes: 50
 
 biomes:
-    - name: grassy
-      color:
-          - 52
-          - 168
-          - 59
+    - name: grass
+      color: "#72ad5d"
+      probability: 0.6
+      visibility: 1.0
+      temperature: 0.5
+
+    - name: forest
+      color: "#3f6830"
       probability: 0.5
+      visibility: 0.6
+      temperature: 0.5
 
-    - name: rocky
-      color:
-          - 112
-          - 103
-          - 96
-      probability: 0.1
-
-    - name: foresty
-      color:
-          - 48
-          - 94
-          - 36
-      probability: 0.4
-
-    - name: fields
-      color:
-          - 232
-          - 208
-          - 27
-      probability: 0.3
+    - name: desert
+      color: "#b5ba6f"
+      probability: 0.2
+      visibility: 1.0
+      temperature: 1.0

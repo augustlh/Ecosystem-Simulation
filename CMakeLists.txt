@@ -19,7 +19,7 @@ set(SOURCES
 
 set(HEADERS
     "include/Camera.h"
-    "include/Exceptions.h"
+    "include/Ecosim.h"
     "include/Generation.h"
     "include/Interfaces.h"
     "include/Map.h"
