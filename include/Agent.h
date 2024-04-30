@@ -12,6 +12,7 @@ namespace Ecosim
     {
     private:
         Vector2<float> m_Pos;
+        AgentBrain m_Brain;
 
     public:
         Agent(Vector2<float> pos);
@@ -23,6 +24,30 @@ namespace Ecosim
         Vector2<float> getPos() override { return m_Pos; }
     };
 
+    class AgentBrain
+    {
+    private:
+        std::vector<float> m_DNA;
+        Agent *m_Agent;
+
+    public:
+        AgentBrain();
+        ~AgentBrain();
+
+        void Mutate();
+        void Crossover(AgentBrain &other);
+
+        void RequestAction();
+    }
+
+    /*
+    Tanker omkring implementering af DNA:
+
+
+
+
+
+    */
 }
 
 #endif /* AGENT_H */

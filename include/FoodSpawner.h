@@ -4,4 +4,6 @@
 #include "Food.h"
 #include "Map.h"
 
+#include <Vector2.h>
+
 #endif

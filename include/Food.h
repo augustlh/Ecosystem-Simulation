@@ -6,10 +6,11 @@
 
 namespace Ecosim
 {
-    class Food : public Renderable, public Collidable
+    class Food : public Renderable, public Collidable, public Eatable
     {
     private:
         Vector2<float> m_Pos;
+        float m_Energy;
 
     public:
         Food(Vector2<float> pos);
@@ -17,7 +18,13 @@ namespace Ecosim
 
         void Draw() override;
         bool Collides(Collidable &other) override;
+
         Vector2<float> getPos() override { return m_Pos; }
+        float getEnergy() { return m_Energy; }
+
+        float OnEaten(Eatable &other) override;
+
+        void ResetFood();
     };
 
 }

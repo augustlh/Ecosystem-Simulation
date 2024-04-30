@@ -14,6 +14,7 @@ set(SOURCES
     "src/Simulation.cpp"
     "src/Window.cpp"
     "src/Agent.cpp"
+    "src/Food.cpp"
 )
 
 set(HEADERS
@@ -27,6 +28,7 @@ set(HEADERS
     "include/Window.h"
     "include/Agent.h"
     "include/QuadTree.h"
+    "include/Food.h"
 )
 
 add_executable(Ecosim ${SOURCES} ${HEADERS})

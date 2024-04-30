@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Agent.h"
 #include "QuadTree.h"
+#include "Food.h"
 
 #include <MiniYaml/Yaml.hpp>
 
@@ -151,6 +152,13 @@ namespace Ecosim
             collidables.push_back(agent);
         }
 
+        // for (int i = 0; i < 300; ++i)
+        // {
+        //     std::shared_ptr<Food> food = std::make_shared<Food>(Vector2<float>(std::rand() % 800, std::rand() % 800));
+        //     renderables.push_back(food);
+        //     collidables.push_back(food);
+        // }
+
         SDL_Event sdlEvent;
         bool shouldClose = false;
 
@@ -198,20 +206,42 @@ namespace Ecosim
             for (const auto &simulatable : simulatables)
                 simulatable->Step(/*delta time*/);
 
-            quadTree.Clear();
-
-            for (auto &collidable : collidables)
-                quadTree.Insert(collidable.get());
-
             Renderer::Background(Color(51, 77, 102));
             Map::Render();
             for (const auto &renderable : renderables)
                 renderable->Draw();
 
-            root.Render();
-            range.Render();
+            // quadTree.Clear();
 
-            quadTree.Render();
+            // for (auto &collidable : collidables)
+            //     quadTree.Insert(collidable.get());
+
+            // for (auto &collidable : collidables)
+            // {
+            //     std::vector<Collidable *> objects;
+            //     Node test(collidable->getPos().Convert<int>(), 10);
+            //     quadTree.Query(test, objects);
+
+            //     for (auto &other : objects)
+            //     {
+            //         if (collidable->Collides(*other))
+            //         {
+            //             if (auto agent = dynamic_cast<Agent *>(collidable.get()))
+            //             {
+            //                 if (auto food = dynamic_cast<Food *>(other))
+            //                 {
+            //                     // agent->Eat(food->OnEaten(*agent));
+            //                     food->ResetFood();
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+
+            // root.Render();
+            // range.Render();
+
+            // quadTree.Render();
 
             Renderer::RenderFrame();
         }

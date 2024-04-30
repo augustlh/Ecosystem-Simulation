@@ -22,8 +22,15 @@ namespace Ecosim
     public:
         virtual bool Collides(Collidable &other) = 0;
         virtual Vector2<float> getPos() = 0;
-        virtual ~Collidable(){};
+        virtual ~Collidable() = default;
     };
-};
+
+    class Eatable
+    {
+    public:
+        virtual float OnEaten(Eatable &other) = 0;
+        virtual ~Eatable() = default;
+    };
+}
 
 #endif /* INTERFACES_H */
