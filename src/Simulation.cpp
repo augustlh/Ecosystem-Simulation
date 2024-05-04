@@ -5,6 +5,8 @@
 #include "Interfaces.h"
 #include "Map.h"
 #include "Camera.h"
+#include "Agent.h"
+#include "CollisionHandler.h"
 
 #include <MiniYaml/Yaml.hpp>
 
@@ -95,29 +97,34 @@ namespace Ecosim
 
         std::vector<std::shared_ptr<Renderable>> renderables;
         std::vector<std::shared_ptr<Simulatable>> simulatables;
+        std::vector<std::shared_ptr<Collidable>> collidables;
 
         Statistics::Initalize();
 
         for (int i = 0; i < m_config.numAgents; ++i)
         {
-            Temp::Agent a{};
-            std::shared_ptr<Temp::Agent> ptr = std::make_shared<Temp::Agent>(a);
+            Agent a{};
+            std::shared_ptr<Agent> ptr = std::make_shared<Agent>(a);
 
             renderables.emplace_back(ptr);
             simulatables.emplace_back(ptr);
+            collidables.emplace_back(ptr);
         }
 
-        for (int i = 0; i < m_config.numFood; ++i)
-        {
-            Temp::Food f{};
-            renderables.emplace_back(std::make_shared<Temp::Food>(f));
+        for (const auto &collidable : collidables)
+            CollisionHandler::AddCollidable(collidable);
 
-            Statistics::Report("Food_X", f.pos.x);
-            Statistics::Report("Food_Y", f.pos.y);
+        // for (int i = 0; i < m_config.numFood; ++i)
+        // {
+        //     Temp::Food f{};
+        //     renderables.emplace_back(std::make_shared<Temp::Food>(f));
 
-            // if (Statistics::MemorySize() >= 200)
-            //     Statistics::Export("FoodData");
-        }
+        //     Statistics::Report("Food_X", f.pos.x);
+        //     Statistics::Report("Food_Y", f.pos.y);
+
+        //     // if (Statistics::MemorySize() >= 200)
+        //     //     Statistics::Export("FoodData");
+        // }
 
         while (!shouldClose)
         {
@@ -145,6 +152,9 @@ namespace Ecosim
             for (const auto &simulatable : simulatables)
                 simulatable->Step(deltaTime);
 
+            CollisionHandler::Rebuild();
+            CollisionHandler::CheckCollisions();
+
             if (!limitDisplay || thisFrame - lastDisplayed >= displayInterval)
             {
                 lastDisplayed = thisFrame;
@@ -161,6 +171,8 @@ namespace Ecosim
 
                 for (const auto &renderable : renderables)
                     renderable->Draw();
+
+                CollisionHandler::Render();
 
                 Renderer::RenderFrame();
             }

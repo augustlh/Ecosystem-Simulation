@@ -1,6 +1,6 @@
 simulation-name: "Super cool simulation (wow)"
 num-agents: 100
 total-food: 500
-enviroment: "/home/alexa/dev/projects/Ecosystem-Simulation/configs/enviroments/continent.yaml"
+enviroment: "C:/Users/August/Ecosystem-Simulation/configs/enviroments"
 num-seconds: 0
 store-data: false

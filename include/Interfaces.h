@@ -1,6 +1,8 @@
 #ifndef INTERFACES_H
 #define INTERFACES_H
 
+#include "Vector2.h"
+
 namespace Ecosim
 {
     /// @brief An interface for all objects that can be rendered to the screen
@@ -24,6 +26,23 @@ namespace Ecosim
 
         /// @brief A destructor to insure sub-classes are properly destructed, if freed through a `Simulatable`-pointer
         virtual ~Simulatable() {}
+    };
+
+    /// @brief An interface for all objects that can collide
+    class Collidable
+    {
+    public:
+        /// @brief A destructor to insure sub-classes are properly destructed, if freed through a `Collidable`-pointer
+        virtual ~Collidable() = default;
+
+        /// @brief Checks if this object collides with another object
+        virtual bool Collides(std::shared_ptr<Collidable> other) = 0;
+
+        /// @brief Handles the collision with another object
+        virtual void handleCollision(std::shared_ptr<Collidable> other) = 0;
+
+        /// @brief Returns the position of this object
+        virtual Vector2<float> getPosition() = 0;
     };
 };
 
