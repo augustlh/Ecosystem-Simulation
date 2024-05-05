@@ -24,12 +24,20 @@ namespace Ecosim
         CollisionHandler::Query(m_Pos, 400, collidables);
 
         // Decide on action based on observations
-        Vector2<float> direction = Vector2<float>(0, 0);
+        Vector2<float> direction = Vector2<float>(400, 400) - m_Pos;
+
+        // move towards 00
+        // m_Pos += direction / direction.Magnitude() * m_Dna.speed * 5 * deltaTime;
     }
 
     void Agent::handleCollision(std::shared_ptr<Collidable> other)
     {
         m_Color = Color(255, 0, 0);
+        //hvis mad, æd
+        //mad, skal dø
+        //Food.Respawn();
+        //hvi agent, tjek om du kan æde eller om du bliver ædt, act accordingly
+        //bool isDead;
     }
 
     bool Agent::Collides(std::shared_ptr<Collidable> other)

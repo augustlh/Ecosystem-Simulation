@@ -36,6 +36,9 @@ namespace Ecosim
         /// @return The magnitude of the vector
         float Magnitude() const { return std::sqrt(x * x + y * y); }
 
+        /// @return The square magnitude of the vector
+        float SquareMagnitude() const { return (x * x + y * y); }
+
         /// @brief Vector-vector addition, returning a new `Vector2<T>`-object
         /// @param other The vector to add to this vector
         /// @return The elementwise sum of the two vectors

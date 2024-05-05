@@ -41,14 +41,13 @@ namespace Ecosim
         m_QuadTree.Query(Node(position, radius), collidables);
 
         std::sort(collidables.begin(), collidables.end(), [position](std::shared_ptr<Collidable> a, std::shared_ptr<Collidable> b)
-                  { return (a->getPosition() - position).Magnitude() < (b->getPosition() - position).Magnitude(); });
+                  { return (a->getPosition() - position).SquareMagnitude() < (b->getPosition() - position).SquareMagnitude(); });
         return;
     }
 
     void CollisionHandler::AddCollidable(std::shared_ptr<Collidable> collidable)
     {
         m_Collidables.push_back(collidable);
-        // m_QuadTree.Insert(collidable);
     }
 
     void CollisionHandler::RemoveCollidable(std::shared_ptr<Collidable> collidable)
