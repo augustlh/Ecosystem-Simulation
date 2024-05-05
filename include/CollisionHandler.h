@@ -16,6 +16,8 @@ namespace Ecosim
         static void CheckCollisions();
         static void Query(Vector2<float> position, float radius, std::vector<std::shared_ptr<Collidable>> &collidables);
 
+        static void SetCollidables(std::vector<std::shared_ptr<Collidable>> &collidables);
+
         static void AddCollidable(std::shared_ptr<Collidable> collidable);
         static void RemoveCollidable(std::shared_ptr<Collidable> collidable);
 

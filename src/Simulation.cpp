@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Agent.h"
 #include "CollisionHandler.h"
+#include "Food.h"
 
 #include <MiniYaml/Yaml.hpp>
 
@@ -60,7 +61,7 @@ namespace Ecosim
 
         name = root["simulation-name"].As<std::string>("Unnamed simulation");
         numAgents = root["num-agents"].As<uint>(100);
-        numFood = root["total-food"].As<uint>(100);
+        numFood = root["total-food"].As<uint>(200);
         enviromentConfigPath = root["enviroment"].As<std::string>("<no enviroment>");
         numSeconds = root["num-seconds"].As<uint>(0);
         storeData = root["store-data"].As<bool>(false);
@@ -111,20 +112,22 @@ namespace Ecosim
             collidables.emplace_back(ptr);
         }
 
-        for (const auto &collidable : collidables)
-            CollisionHandler::AddCollidable(collidable);
+        for (int i = 0; i < m_config.numFood; ++i)
+        {
+            Food f{};
+            std::shared_ptr<Food> ptr = std::make_shared<Food>(f);
 
-        // for (int i = 0; i < m_config.numFood; ++i)
-        // {
-        //     Temp::Food f{};
-        //     renderables.emplace_back(std::make_shared<Temp::Food>(f));
+            renderables.emplace_back(ptr);
+            collidables.emplace_back(ptr);
 
-        //     Statistics::Report("Food_X", f.pos.x);
-        //     Statistics::Report("Food_Y", f.pos.y);
+            Statistics::Report("Food_X", f.getPosition().x);
+            Statistics::Report("Food_Y", f.getPosition().y);
+        }
 
-        //     // if (Statistics::MemorySize() >= 200)
-        //     //     Statistics::Export("FoodData");
-        // }
+        // for (const auto &collidable : collidables)
+        //     CollisionHandler::AddCollidable(collidable);
+
+        CollisionHandler::SetCollidables(collidables);
 
         while (!shouldClose)
         {
@@ -149,8 +152,33 @@ namespace Ecosim
 
             double deltaTime = (thisFrame - lastFrame) * 0.001;
 
+            /* Remove dead agents */
+            for (auto it = collidables.begin(); it != collidables.end();)
+            {
+                if (auto agent = std::dynamic_pointer_cast<Agent>(*it))
+                {
+                    if (agent->isDead)
+                    {
+                        CollisionHandler::RemoveCollidable(*it);
+
+                        auto renderable = std::dynamic_pointer_cast<Renderable>(*it);
+                        renderables.erase(std::remove(renderables.begin(), renderables.end(), renderable), renderables.end());
+
+                        auto simulatable = std::dynamic_pointer_cast<Simulatable>(*it);
+                        simulatables.erase(std::remove(simulatables.begin(), simulatables.end(), simulatable), simulatables.end());
+
+                        it = collidables.erase(it);
+                        continue;
+                    }
+                }
+                ++it;
+            }
+            /* Remove dead agents */
+
             for (const auto &simulatable : simulatables)
                 simulatable->Step(deltaTime);
+
+            CollisionHandler::SetCollidables(collidables);
 
             CollisionHandler::Rebuild();
             CollisionHandler::CheckCollisions();

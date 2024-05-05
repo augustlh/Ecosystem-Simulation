@@ -38,6 +38,8 @@ namespace Ecosim
         Agent();
         ~Agent() = default;
 
+        bool isDead = false;
+
         void Draw() override;
         void Step(double deltaTime) override;
 

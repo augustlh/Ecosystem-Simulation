@@ -2,6 +2,8 @@
 #include "CollisionHandler.h"
 #include <random>
 
+#include "Food.h"
+
 namespace Ecosim
 {
     Agent::Agent()
@@ -19,6 +21,21 @@ namespace Ecosim
 
     void Agent::Step(double deltaTime)
     {
+        // Decay health and energy
+        m_Dna.energy -= m_Dna.energyDecay * 100 * deltaTime;
+
+        if (m_Dna.energy < 0)
+        {
+            m_Dna.health -= m_Dna.healthDecay * deltaTime;
+        }
+
+        // Check environmental factors. If agent is in water and is not a fish, decrease health. If land and fish, decrease health.
+
+        if (m_Dna.health < 0)
+        {
+            isDead = true;
+        }
+
         // Collect observations from CollisionHandler
         std::vector<std::shared_ptr<Collidable>> collidables;
         CollisionHandler::Query(m_Pos, 400, collidables);
@@ -27,17 +44,25 @@ namespace Ecosim
         Vector2<float> direction = Vector2<float>(400, 400) - m_Pos;
 
         // move towards 00
-        // m_Pos += direction / direction.Magnitude() * m_Dna.speed * 5 * deltaTime;
+        m_Pos += direction / direction.Magnitude() * m_Dna.speed * 5 * deltaTime;
     }
 
     void Agent::handleCollision(std::shared_ptr<Collidable> other)
     {
-        m_Color = Color(255, 0, 0);
-        //hvis mad, æd
-        //mad, skal dø
-        //Food.Respawn();
-        //hvi agent, tjek om du kan æde eller om du bliver ædt, act accordingly
-        //bool isDead;
+
+        if (std::dynamic_pointer_cast<Food>(other))
+        {
+            m_Dna.energy += std::dynamic_pointer_cast<Food>(other)->getEnergy() * 0.65;
+            std::dynamic_pointer_cast<Food>(other)->Respawn();
+            isDead = true;
+        }
+
+        // m_Color = Color(255, 0, 0);
+        //  hvis mad, æd
+        //  mad, skal dø
+        //  Food.Respawn();
+        //  hvi agent, tjek om du kan æde eller om du bliver ædt, act accordingly
+        //  bool isDead;
     }
 
     bool Agent::Collides(std::shared_ptr<Collidable> other)

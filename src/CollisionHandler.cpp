@@ -2,6 +2,8 @@
 #include "QuadTree.h"
 #include <algorithm>
 
+#include "Food.h"
+
 namespace Ecosim
 {
     std::vector<std::shared_ptr<Collidable>> CollisionHandler::m_Collidables;
@@ -21,6 +23,11 @@ namespace Ecosim
     {
         for (auto &collidable : m_Collidables)
         {
+            if (std::dynamic_pointer_cast<Food>(collidable))
+            {
+                continue;
+            }
+
             std::vector<std::shared_ptr<Collidable>> found;
             m_QuadTree.Query(Node(collidable->getPosition(), 20), found);
 
@@ -43,6 +50,11 @@ namespace Ecosim
         std::sort(collidables.begin(), collidables.end(), [position](std::shared_ptr<Collidable> a, std::shared_ptr<Collidable> b)
                   { return (a->getPosition() - position).SquareMagnitude() < (b->getPosition() - position).SquareMagnitude(); });
         return;
+    }
+
+    void CollisionHandler::SetCollidables(std::vector<std::shared_ptr<Collidable>> &collidables)
+    {
+        m_Collidables = collidables;
     }
 
     void CollisionHandler::AddCollidable(std::shared_ptr<Collidable> collidable)

@@ -18,6 +18,7 @@ set(SOURCES
     "src/Agent.cpp"
     "src/CollisionHandler.cpp"
     "src/QuadTree.cpp"
+    "src/Food.cpp"
 )
 
 set(HEADERS
@@ -34,6 +35,7 @@ set(HEADERS
     "include/Agent.h"
     "include/CollisionHandler.h"
     "include/QuadTree.h"
+    "include/Food.h"
 )
 
 add_executable(Ecosim ${SOURCES} ${HEADERS})
