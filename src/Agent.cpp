@@ -22,7 +22,7 @@ namespace Ecosim
     void Agent::Step(double deltaTime)
     {
         // Decay health and energy
-        m_Dna.energy -= m_Dna.energyDecay * 100 * deltaTime;
+        m_Dna.energy -= m_Dna.energyDecay * deltaTime;
 
         if (m_Dna.energy < 0)
         {
@@ -38,13 +38,22 @@ namespace Ecosim
 
         // Collect observations from CollisionHandler
         std::vector<std::shared_ptr<Collidable>> collidables;
-        CollisionHandler::Query(m_Pos, 400, collidables);
+        CollisionHandler::Query(m_Pos, m_Dna.searchRadius * 10, collidables);
 
-        // Decide on action based on observations
-        Vector2<float> direction = Vector2<float>(400, 400) - m_Pos;
+        // Find closest food
+        Vector2<float> closestFood;
+        for (auto &collidable : collidables)
+        {
+            if (std::dynamic_pointer_cast<Food>(collidable))
+            {
+                closestFood = collidable->getPosition();
+                break;
+            }
+        }
 
-        // move towards 00
-        m_Pos += direction / direction.Magnitude() * m_Dna.speed * 5 * deltaTime;
+        // Move towards closest food
+        Vector2<float> direction = closestFood - m_Pos;
+        m_Pos += direction / direction.Magnitude() * m_Dna.speed * deltaTime;
     }
 
     void Agent::handleCollision(std::shared_ptr<Collidable> other)
