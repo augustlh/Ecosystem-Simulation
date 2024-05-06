@@ -56,14 +56,4 @@ namespace Ecosim
     {
         m_Collidables = collidables;
     }
-
-    void CollisionHandler::AddCollidable(std::shared_ptr<Collidable> collidable)
-    {
-        m_Collidables.push_back(collidable);
-    }
-
-    void CollisionHandler::RemoveCollidable(std::shared_ptr<Collidable> collidable)
-    {
-        m_Collidables.erase(std::remove(m_Collidables.begin(), m_Collidables.end(), collidable), m_Collidables.end());
-    }
 }

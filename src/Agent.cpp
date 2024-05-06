@@ -11,37 +11,24 @@ namespace Ecosim
         m_Pos = Vector2<float>(rand() % 800, rand() % 800);
         m_Color = Color(255, 255, 255);
         m_Radius = 3;
-        m_Dna = AgentDNA();
+        m_Dna = DNA();
     }
 
+    /// @brief Draw agent on screen
     void Agent::Draw()
     {
         Renderer::Circle(m_Pos.Convert<int>(), 3, m_Color);
     }
 
+    /// @brief Ask agent to take a step in the simulation
+    /// @param deltaTime
     void Agent::Step(double deltaTime)
     {
-        // Decay health and energy
-        m_Dna.energy -= m_Dna.energyDecay * deltaTime;
-
-        if (m_Dna.energy < 0)
-        {
-            m_Dna.health -= m_Dna.healthDecay * deltaTime;
-        }
-
-        // Check environmental factors. If agent is in water and is not a fish, decrease health. If land and fish, decrease health.
-
-        if (m_Dna.health < 0)
-        {
-            isDead = true;
-        }
-
-        // Collect observations from CollisionHandler
+        // Collect observations from environment by querying the collision handler
         std::vector<std::shared_ptr<Collidable>> collidables;
-        CollisionHandler::Query(m_Pos, m_Dna.searchRadius * 10, collidables);
+        CollisionHandler::Query(m_Pos, m_Dna.getSearchRadius(), collidables);
 
-        // Find closest food
-        Vector2<float> closestFood;
+        Vector2<float> closestFood = Vector2<float>(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
         for (auto &collidable : collidables)
         {
             if (std::dynamic_pointer_cast<Food>(collidable))
@@ -51,9 +38,21 @@ namespace Ecosim
             }
         }
 
-        // Move towards closest food
-        Vector2<float> direction = closestFood - m_Pos;
-        m_Pos += direction / direction.Magnitude() * m_Dna.speed * deltaTime;
+        Vector2<float> foodDirection = Vector2<float>(0, 0);
+
+        if (closestFood.x != std::numeric_limits<float>::max())
+        {
+            foodDirection = closestFood - m_Pos;
+            foodDirection.Normalize();
+        }
+
+        Move(foodDirection, deltaTime);
+    }
+
+    /// @brief Move agent in a direction, direction needs to be normalized
+    void Agent::Move(Vector2<float> direction, double deltaTime)
+    {
+        m_Pos += direction * m_Dna.getSpeed() * 10 * deltaTime;
     }
 
     void Agent::handleCollision(std::shared_ptr<Collidable> other)
@@ -61,9 +60,13 @@ namespace Ecosim
 
         if (std::dynamic_pointer_cast<Food>(other))
         {
-            m_Dna.energy += std::dynamic_pointer_cast<Food>(other)->getEnergy() * 0.65;
+            float foodEnergy = std::dynamic_pointer_cast<Food>(other)->getEnergy();
+            m_Dna.setEnergy(m_Dna.getEnergy() + foodEnergy * 0.65);
             std::dynamic_pointer_cast<Food>(other)->Respawn();
-            isDead = true;
+        }
+
+        if (std::dynamic_pointer_cast<Agent>(other))
+        {
         }
 
         // m_Color = Color(255, 0, 0);
@@ -86,37 +89,40 @@ namespace Ecosim
         return m_Pos;
     }
 
-    // ---- AgentDNA ----
+    // // ---- AgentDNA ----
 
-    AgentDNA::AgentDNA()
-    {
-        Initialize();
-    }
+    // AgentDNA::AgentDNA()
+    // {
+    //     Initialize();
+    // }
 
-    void AgentDNA::Initialize()
-    {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+    // void AgentDNA::Initialize()
+    // {
+    //     std::random_device rd;
+    //     std::mt19937 gen(rd());
+    //     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-        searchRadius = 10 + dist(gen) * 2;
-        health = 100 + dist(gen) * 2;
-        energy = 100 + dist(gen) * 2;
-        speed = 5 + dist(gen) * 2;
+    //     searchRadius = 40 + dist(gen) * 40;
+    //     health = 100;
+    //     energy = 100;
+    //     speed = 8;
 
-        energyDecay = 0.1 + dist(gen) * 0.2;
-        healthDecay = 0.1 + dist(gen) * 0.2;
-    }
+    //     predator = dist(gen);
+    //     prey = 1 - predator;
 
-    void AgentDNA::Mutate()
-    {
-        searchRadius += static_cast<float>(rand() % 3 - 1);
-        health += static_cast<float>(rand() % 3 - 1);
-        energy += static_cast<float>(rand() % 3 - 1);
-        speed += static_cast<float>(rand() % 3 - 1);
+    //     energyDecay = 0.05;
+    //     healthDecay = 0.05;
+    // }
 
-        energyDecay += static_cast<float>(rand() % 3 - 1);
-        healthDecay += static_cast<float>(rand() % 3 - 1);
-    }
+    // void AgentDNA::Mutate()
+    // {
+    //     searchRadius += static_cast<float>(rand() % 3 - 1);
+    //     health += static_cast<float>(rand() % 3 - 1);
+    //     energy += static_cast<float>(rand() % 3 - 1);
+    //     speed += static_cast<float>(rand() % 3 - 1);
+
+    //     energyDecay += static_cast<float>(rand() % 3 - 1);
+    //     healthDecay += static_cast<float>(rand() % 3 - 1);
+    // }
 
 }

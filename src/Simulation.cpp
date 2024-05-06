@@ -124,9 +124,6 @@ namespace Ecosim
             Statistics::Report("Food_Y", f.getPosition().y);
         }
 
-        // for (const auto &collidable : collidables)
-        //     CollisionHandler::AddCollidable(collidable);
-
         CollisionHandler::SetCollidables(collidables);
 
         while (!shouldClose)
@@ -152,36 +149,8 @@ namespace Ecosim
 
             double deltaTime = (thisFrame - lastFrame) * 0.001;
 
-            /* Remove dead agents */
-            for (auto it = collidables.begin(); it != collidables.end();)
-            {
-                if (auto agent = std::dynamic_pointer_cast<Agent>(*it))
-                {
-                    if (agent->isDead)
-                    {
-                        CollisionHandler::RemoveCollidable(*it);
-
-                        auto renderable = std::dynamic_pointer_cast<Renderable>(*it);
-                        renderables.erase(std::remove(renderables.begin(), renderables.end(), renderable), renderables.end());
-
-                        auto simulatable = std::dynamic_pointer_cast<Simulatable>(*it);
-                        simulatables.erase(std::remove(simulatables.begin(), simulatables.end(), simulatable), simulatables.end());
-
-                        it = collidables.erase(it);
-                        continue;
-                    }
-                }
-                ++it;
-            }
-            /* Remove dead agents */
-
             for (const auto &simulatable : simulatables)
                 simulatable->Step(deltaTime);
-
-            CollisionHandler::SetCollidables(collidables);
-
-            CollisionHandler::Rebuild();
-            CollisionHandler::CheckCollisions();
 
             if (!limitDisplay || thisFrame - lastDisplayed >= displayInterval)
             {
@@ -204,6 +173,10 @@ namespace Ecosim
 
                 Renderer::RenderFrame();
             }
+
+            CollisionHandler::SetCollidables(collidables);
+            CollisionHandler::Rebuild();
+            CollisionHandler::CheckCollisions();
         }
 
         Map::Cleanup();

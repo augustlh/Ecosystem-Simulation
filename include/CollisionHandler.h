@@ -12,19 +12,26 @@ namespace Ecosim
     class CollisionHandler
     {
     public:
+        /// @brief Rebuilds the quadtree
         static void Rebuild();
+
+        /// @brief Checks for collisions between collidables
         static void CheckCollisions();
+
+        /// @brief Queries the quadtree for collidables within a certain radius of a position
         static void Query(Vector2<float> position, float radius, std::vector<std::shared_ptr<Collidable>> &collidables);
 
+        /// @brief Sets the collidables to be used in the quadtree
         static void SetCollidables(std::vector<std::shared_ptr<Collidable>> &collidables);
 
-        static void AddCollidable(std::shared_ptr<Collidable> collidable);
-        static void RemoveCollidable(std::shared_ptr<Collidable> collidable);
-
+        /// @brief Renders the quadtree
         static void Render() { m_QuadTree.Render(); }
 
     private:
+        /// @brief The collidables to be used in the quadtree
         static std::vector<std::shared_ptr<Collidable>> m_Collidables;
+
+        /// @brief The quadtree used for collision detection
         static QuadTree m_QuadTree;
     };
 }

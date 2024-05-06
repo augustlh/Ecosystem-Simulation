@@ -39,6 +39,19 @@ namespace Ecosim
         /// @return The square magnitude of the vector
         float SquareMagnitude() const { return (x * x + y * y); }
 
+        /// @brief Normalize the vector
+        /// @return A reference to this vector
+        Vector2<T> &Normalize()
+        {
+            float mag = Magnitude();
+            if (mag > 0)
+            {
+                x /= mag;
+                y /= mag;
+            }
+            return *this;
+        }
+
         /// @brief Vector-vector addition, returning a new `Vector2<T>`-object
         /// @param other The vector to add to this vector
         /// @return The elementwise sum of the two vectors

@@ -36,6 +36,7 @@ set(HEADERS
     "include/CollisionHandler.h"
     "include/QuadTree.h"
     "include/Food.h"
+    "include/DNA.h"
 )
 
 add_executable(Ecosim ${SOURCES} ${HEADERS})
