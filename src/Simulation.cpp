@@ -60,7 +60,7 @@ namespace Ecosim
         ECOSIM_CATCH_AND_CALL(std::exception & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to open and read yaml source: '%s'\n%s", configPath, e.what()))
 
         name = root["simulation-name"].As<std::string>("Unnamed simulation");
-        numAgents = root["num-agents"].As<uint>(100);
+        numAgents = root["num-agents"].As<uint>(20);
         numFood = root["total-food"].As<uint>(200);
         enviromentConfigPath = root["enviroment"].As<std::string>("<no enviroment>");
         numSeconds = root["num-seconds"].As<uint>(0);
@@ -169,12 +169,12 @@ namespace Ecosim
                 for (const auto &renderable : renderables)
                     renderable->Draw();
 
-                CollisionHandler::Render();
+                // CollisionHandler::Render();
 
                 Renderer::RenderFrame();
             }
 
-            CollisionHandler::SetCollidables(collidables);
+            // CollisionHandler::SetCollidables(collidables);
             CollisionHandler::Rebuild();
             CollisionHandler::CheckCollisions();
         }

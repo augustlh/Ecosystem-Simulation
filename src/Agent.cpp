@@ -12,6 +12,11 @@ namespace Ecosim
         m_Color = Color(255, 255, 255);
         m_Radius = 3;
         m_Dna = DNA();
+
+        if (m_Dna.isPredator())
+        {
+            m_Color = Color(255, 0, 0);
+        }
     }
 
     /// @brief Draw agent on screen
@@ -31,7 +36,7 @@ namespace Ecosim
         Vector2<float> closestFood = Vector2<float>(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
         for (auto &collidable : collidables)
         {
-            if (std::dynamic_pointer_cast<Food>(collidable))
+            if (collidable->getType() == FOOD)
             {
                 closestFood = collidable->getPosition();
                 break;
@@ -55,74 +60,83 @@ namespace Ecosim
         m_Pos += direction * m_Dna.getSpeed() * 10 * deltaTime;
     }
 
-    void Agent::handleCollision(std::shared_ptr<Collidable> other)
+    void Agent::handleCollision(std::shared_ptr<Collidable> &other)
     {
-
-        if (std::dynamic_pointer_cast<Food>(other))
+        if (other->getType() == FOOD)
         {
-            float foodEnergy = std::dynamic_pointer_cast<Food>(other)->getEnergy();
-            m_Dna.setEnergy(m_Dna.getEnergy() + foodEnergy * 0.65);
-            std::dynamic_pointer_cast<Food>(other)->Respawn();
+            resolveAgentFoodCollision(other);
+            return;
         }
 
-        if (std::dynamic_pointer_cast<Agent>(other))
+        if (other->getType() == AGENT)
         {
+            resolveAgentAgentCollision(other);
+            return;
         }
-
-        // m_Color = Color(255, 0, 0);
-        //  hvis mad, æd
-        //  mad, skal dø
-        //  Food.Respawn();
-        //  hvi agent, tjek om du kan æde eller om du bliver ædt, act accordingly
-        //  bool isDead;
     }
 
-    bool Agent::Collides(std::shared_ptr<Collidable> other)
+    void Agent::resolveAgentFoodCollision(std::shared_ptr<Collidable> &food)
     {
-        Vector2<float> otherPos = other->getPosition();
-        float distance = sqrt((m_Pos.x - otherPos.x, 2) - pow(m_Pos.y - otherPos.y, 2));
-        return distance < 2 * m_Radius;
+        Eat(food, FOOD);
+    }
+
+    void Agent::resolveAgentAgentCollision(std::shared_ptr<Collidable> &agent)
+    {
+        auto eatableAgent = std::dynamic_pointer_cast<Agent>(agent);
+        if (eatableAgent)
+        {
+            if (m_Dna.isPredator() && !eatableAgent->m_Dna.isPredator())
+            {
+                Eat(agent, AGENT);
+            }
+
+            if (!m_Dna.isPredator() && eatableAgent->m_Dna.isPredator())
+            {
+                eatableAgent->Eat(agent, AGENT);
+            }
+
+            if (m_Dna.isPredator() && eatableAgent->m_Dna.isPredator())
+            {
+                if (m_Dna.getEnergy() * m_Dna.getStrength() > eatableAgent->m_Dna.getEnergy() * eatableAgent->m_Dna.getStrength())
+                {
+                    Eat(agent, AGENT);
+                }
+                else
+                {
+                    eatableAgent->Eat(agent, AGENT);
+                }
+            }
+        }
+    }
+
+    void Agent::Eat(std::shared_ptr<Collidable> &other, CollidableType type)
+    {
+
+        std::shared_ptr<Eatable> eatable = std::dynamic_pointer_cast<Eatable>(other);
+        if (eatable)
+        {
+            m_Dna.setEnergy(m_Dna.getEnergy() + eatable->getEnergy() * 0.65);
+            if (type == AGENT)
+            {
+                std::dynamic_pointer_cast<Agent>(other)->Kill();
+                return;
+            }
+
+            if (type == FOOD)
+            {
+                std::dynamic_pointer_cast<Food>(other)->Respawn();
+                return;
+            }
+        }
+    }
+
+    bool Agent::Collides(std::shared_ptr<Collidable> &other)
+    {
+        return (m_Pos - other->getPosition()).Magnitude() < m_Radius + 3;
     }
 
     Vector2<float> Agent::getPosition()
     {
         return m_Pos;
     }
-
-    // // ---- AgentDNA ----
-
-    // AgentDNA::AgentDNA()
-    // {
-    //     Initialize();
-    // }
-
-    // void AgentDNA::Initialize()
-    // {
-    //     std::random_device rd;
-    //     std::mt19937 gen(rd());
-    //     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-
-    //     searchRadius = 40 + dist(gen) * 40;
-    //     health = 100;
-    //     energy = 100;
-    //     speed = 8;
-
-    //     predator = dist(gen);
-    //     prey = 1 - predator;
-
-    //     energyDecay = 0.05;
-    //     healthDecay = 0.05;
-    // }
-
-    // void AgentDNA::Mutate()
-    // {
-    //     searchRadius += static_cast<float>(rand() % 3 - 1);
-    //     health += static_cast<float>(rand() % 3 - 1);
-    //     energy += static_cast<float>(rand() % 3 - 1);
-    //     speed += static_cast<float>(rand() % 3 - 1);
-
-    //     energyDecay += static_cast<float>(rand() % 3 - 1);
-    //     healthDecay += static_cast<float>(rand() % 3 - 1);
-    // }
-
 }

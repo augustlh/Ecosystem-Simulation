@@ -29,7 +29,7 @@ namespace Ecosim
 
     private:
         /// @brief The collidables to be used in the quadtree
-        static std::vector<std::shared_ptr<Collidable>> m_Collidables;
+        static std::vector<std::shared_ptr<Collidable>> *m_Collidables;
 
         /// @brief The quadtree used for collision detection
         static QuadTree m_QuadTree;

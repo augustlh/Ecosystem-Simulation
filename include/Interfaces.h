@@ -28,21 +28,44 @@ namespace Ecosim
         virtual ~Simulatable() {}
     };
 
+    /// @brief An interface for all objects that can be eaten. All Collidable objects are also Eatable
+    class Eatable
+    {
+    public:
+        /// @brief A destructor to insure sub-classes are properly destructed, if freed through a `Eatable`-pointer
+        virtual ~Eatable() = default;
+
+        /// @brief Returns the energy of this object
+        virtual float getEnergy() = 0;
+    };
+
+    enum CollidableType
+    {
+        AGENT,
+        FOOD
+    };
+
     /// @brief An interface for all objects that can collide
-    class Collidable
+    class Collidable : public Eatable
     {
     public:
         /// @brief A destructor to insure sub-classes are properly destructed, if freed through a `Collidable`-pointer
         virtual ~Collidable() = default;
 
         /// @brief Checks if this object collides with another object
-        virtual bool Collides(std::shared_ptr<Collidable> other) = 0;
+        virtual bool Collides(std::shared_ptr<Collidable> &other) = 0;
 
         /// @brief Handles the collision with another object
-        virtual void handleCollision(std::shared_ptr<Collidable> other) = 0;
+        virtual void handleCollision(std::shared_ptr<Collidable> &other) = 0;
 
         /// @brief Returns the position of this object
         virtual Vector2<float> getPosition() = 0;
+
+        /// @brief Returns the energy of this object. This is a pure virtual function from the Eatable interface
+        virtual float getEnergy() = 0;
+
+        /// @brief Returns the type of this object
+        virtual CollidableType getType() = 0;
     };
 };
 

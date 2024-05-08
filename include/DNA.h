@@ -19,8 +19,17 @@ namespace Ecosim
         /// @brief The speed of the agent.
         double speed;
 
+        /// @brief Defines whether or not the agent is a predator/carnevore or prey/herbivore
+        bool predator;
+
         /// @brief The strength of the agent.
         double strength;
+
+        /// @brief The fear/flee weight of the agent.
+        double fearWeight; // 0-1
+
+        /// @brief The hunger weight of the agent. (Fat? Does it value being full or does it not care?)
+        double hungerWeight; // 0-1
 
         /// @Brief Helper function to get a random value between min and max.
         double random(double min, double max) const
@@ -40,6 +49,10 @@ namespace Ecosim
             speed = random(1.0, 5.0);
             searchRadius = random(40, 100);
             strength = random(1.0, 10.0);
+
+            predator = random(0, 1) > 0.5;
+            fearWeight = random(0, 1);
+            hungerWeight = random(0, 1);
         }
 
     public:
@@ -60,6 +73,15 @@ namespace Ecosim
 
         /// @brief Get the strength of the agent.
         double getStrength() const { return strength; }
+
+        /// @brief Get the fear/flee weight of the agent.
+        double getFearWeight() const { return fearWeight; }
+
+        /// @brief Get the hunger weight of the agent.
+        double getHungerWeight() const { return hungerWeight; }
+
+        /// @brief Get whether or not the agent is a predator/carnevore or prey/herbivore.
+        bool isPredator() const { return predator; }
 
         /// @brief Set the health of the agent.
         void setHealth(double health) { this->health = health; }

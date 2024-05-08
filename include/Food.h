@@ -5,7 +5,7 @@
 
 namespace Ecosim
 {
-    class Food : public Collidable, public Renderable
+    class Food : public Collidable, public Renderable, public Eatable
     {
     private:
         /// @brief The position of the food
@@ -23,12 +23,12 @@ namespace Ecosim
 
         /// @brief Handle collision with another collidable
         /// @param other The other collidable
-        void handleCollision(std::shared_ptr<Collidable> other) override;
+        void handleCollision(std::shared_ptr<Collidable> &other) override;
 
         /// @brief Check if the food collides with another collidable
         /// @param other The other collidable
         /// @return True if the food collides with the other collidable, false otherwise
-        bool Collides(std::shared_ptr<Collidable> other) override;
+        bool Collides(std::shared_ptr<Collidable> &other) override;
 
         /// @brief Get the position of the food
         /// @return The position of the food
@@ -39,7 +39,11 @@ namespace Ecosim
 
         /// @brief Get the energy of the food
         /// @return The energy of the food
-        float getEnergy() { return m_Energy; }
+        float getEnergy() override { return m_Energy; }
+
+        /// @brief Get the type of the collidable
+        /// @return The type of the collidable
+        CollidableType getType() { return FOOD; }
     };
 }
 

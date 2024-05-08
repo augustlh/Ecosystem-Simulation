@@ -14,9 +14,9 @@ namespace Ecosim
         Renderer::Circle(m_Pos.Convert<int>(), 2, Color(0, 255, 20));
     }
 
-    void Food::handleCollision(std::shared_ptr<Collidable> other) {}
+    void Food::handleCollision(std::shared_ptr<Collidable> &other) {}
 
-    bool Food::Collides(std::shared_ptr<Collidable> other)
+    bool Food::Collides(std::shared_ptr<Collidable> &other)
     {
         return false;
     }
