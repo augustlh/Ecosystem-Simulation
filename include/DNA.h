@@ -4,23 +4,33 @@
 
 namespace Ecosim
 {
+
     class DNA
     {
     private:
+        /// @brief Age of the agent.
+        float age;
+
+        /// @brief maximum age of the agent.
+        float maxAge;
+
         /// @brief The health of the agent.
         double health;
 
         /// @brief The energy of the agent.
         double energy;
 
+        /// @brief Energy depletion rate of the agent.
+        double energyDepletionRate;
+
+        /// @brief The energy gain rate of the agent.
+        double metabolism;
+
         /// @brief The search radius of the agent.
         double searchRadius;
 
         /// @brief The speed of the agent.
         double speed;
-
-        /// @brief Defines whether or not the agent is a predator/carnevore or prey/herbivore
-        bool predator;
 
         /// @brief The strength of the agent.
         double strength;
@@ -46,13 +56,20 @@ namespace Ecosim
             health = 100;
             energy = 100;
 
-            speed = random(1.0, 5.0);
+            speed = random(2.5, 4);
+
             searchRadius = random(40, 100);
             strength = random(1.0, 10.0);
 
-            predator = random(0, 1) > 0.5;
             fearWeight = random(0, 1);
-            hungerWeight = random(0, 1);
+
+            hungerWeight = random(0.6, 1);
+
+            energyDepletionRate = random(speed * 0.25, speed);
+            metabolism = random(0.8, 1.5);
+
+            age = 0;
+            maxAge = random(100, 200);
         }
 
     public:
@@ -80,8 +97,11 @@ namespace Ecosim
         /// @brief Get the hunger weight of the agent.
         double getHungerWeight() const { return hungerWeight; }
 
-        /// @brief Get whether or not the agent is a predator/carnevore or prey/herbivore.
-        bool isPredator() const { return predator; }
+        /// @brief Get the energy depletion rate of the agent.
+        double getEnergyDepletionRate() const { return energyDepletionRate; }
+
+        /// @brief Get the metabolism of the agent.
+        double getMetabolism() const { return metabolism; }
 
         /// @brief Set the health of the agent.
         void setHealth(double health) { this->health = health; }
@@ -98,15 +118,43 @@ namespace Ecosim
         /// @brief Set the strength of the agent.
         void setStrength(double strength) { this->strength = strength; }
 
-        /// @brief Mutate the DNA of the agent by adding a random value to each property.
-        /// @return The mutated DNA.
+        /// @brief Set the fear/flee weight of the agent.
+        void setFearWeight(double fearWeight) { this->fearWeight = fearWeight; }
+
+        /// @brief Set the hunger weight of the agent.
+        void setHungerWeight(double hungerWeight) { this->hungerWeight = hungerWeight; }
+
+        /// @brief Set the energy depletion rate of the agent.
+        void setEnergyDepletionRate(double energyDepletionRate) { this->energyDepletionRate = energyDepletionRate; }
+
+        /// @brief Set the metabolism of the agent.
+        void setMetabolism(double metabolism) { this->metabolism = metabolism; }
+
+        /// @brief Get the age of the agent.
+        float getAge() const { return age; }
+
+        /// @brief Set the age of the agent.
+        void setAge(float age) { this->age = age; }
+
+        /// @brief Get the maximum age of the agent.
+        float getMaxAge() const { return maxAge; }
+
+        /// @brief Returns a Mutation of the DNA. This is used when an agent reproduces.
         DNA Mutate()
         {
-            DNA newDna;
-            newDna.speed = speed + random(-0.5, 0.5);
-            newDna.searchRadius = searchRadius + random(-5, 5);
-            newDna.strength = strength + random(-0.5, 0.5);
-            return newDna;
+            DNA mutatedDNA = *this;
+
+            mutatedDNA.setHealth(mutatedDNA.getHealth() + random(-5, 5));
+            mutatedDNA.setEnergy(mutatedDNA.getEnergy() + random(-5, 5));
+            mutatedDNA.setSearchRadius(mutatedDNA.getSearchRadius() + random(-5, 5));
+            mutatedDNA.setSpeed(mutatedDNA.getSpeed() + random(-0.5, 0.5));
+            mutatedDNA.setStrength(mutatedDNA.getStrength() + random(-0.5, 0.5));
+            mutatedDNA.setFearWeight(mutatedDNA.getFearWeight() + random(-0.1, 0.1));
+            mutatedDNA.setHungerWeight(mutatedDNA.getHungerWeight() + random(-0.1, 0.1));
+            mutatedDNA.setEnergyDepletionRate(mutatedDNA.getEnergyDepletionRate() + random(-0.1, 0.1));
+            mutatedDNA.setMetabolism(mutatedDNA.getMetabolism() + random(-0.1, 0.1));
+
+            return mutatedDNA;
         }
     };
 }

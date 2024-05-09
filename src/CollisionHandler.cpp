@@ -138,11 +138,6 @@ namespace Ecosim
     {
         // Queries the quadtree for collidables within a certain range of a position and stores them in the collidables vector.
         m_QuadTree.Query(Node(position, radius), collidables);
-
-        // Sorts the collidables vector based on the distance to the position.
-        std::sort(collidables.begin(), collidables.end(), [position](std::shared_ptr<Collidable> a, std::shared_ptr<Collidable> b)
-                  { return (a->getPosition() - position).SquareMagnitude() < (b->getPosition() - position).SquareMagnitude(); });
-        return;
     }
 
     void CollisionHandler::SetCollidables(std::vector<std::shared_ptr<Collidable>> &collidables)

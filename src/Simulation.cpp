@@ -15,7 +15,6 @@
 #include <vector>
 #include <memory>
 
-#include "Removeme_AgentStuff.h"
 #include "Statistics.h"
 
 void HandleKeyRelease(SDL_KeyboardEvent &keyEvent)
@@ -60,7 +59,7 @@ namespace Ecosim
         ECOSIM_CATCH_AND_CALL(std::exception & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to open and read yaml source: '%s'\n%s", configPath, e.what()))
 
         name = root["simulation-name"].As<std::string>("Unnamed simulation");
-        numAgents = root["num-agents"].As<uint>(20);
+        numAgents = root["num-agents"].As<uint>(200);
         numFood = root["total-food"].As<uint>(200);
         enviromentConfigPath = root["enviroment"].As<std::string>("<no enviroment>");
         numSeconds = root["num-seconds"].As<uint>(0);
@@ -148,6 +147,39 @@ namespace Ecosim
                 shouldClose = true;
 
             double deltaTime = (thisFrame - lastFrame) * 0.001;
+
+            /* Scuffed isDead*/
+            auto agentIter = simulatables.begin();
+            while (agentIter != simulatables.end())
+            {
+                if (auto agent = dynamic_cast<Agent *>(agentIter->get()))
+                {
+                    if (agent->isDead)
+                    {
+                        agentIter = simulatables.erase(agentIter);
+
+                        auto renderableIter = std::find_if(renderables.begin(), renderables.end(),
+                                                           [&](const auto &renderable)
+                                                           { return renderable.get() == agent; });
+                        if (renderableIter != renderables.end())
+                            renderables.erase(renderableIter);
+                        auto collidableIter = std::find_if(collidables.begin(), collidables.end(),
+                                                           [&](const auto &collidable)
+                                                           { return collidable.get() == agent; });
+                        if (collidableIter != collidables.end())
+                            collidables.erase(collidableIter);
+                    }
+                    else
+                    {
+                        ++agentIter;
+                    }
+                }
+                else
+                {
+                    ++agentIter;
+                }
+            }
+            /* Scuffed isDead*/
 
             for (const auto &simulatable : simulatables)
                 simulatable->Step(deltaTime);

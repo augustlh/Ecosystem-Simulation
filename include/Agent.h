@@ -16,11 +16,14 @@ namespace Ecosim
         Color m_Color;
         DNA m_Dna;
 
+        std::vector<std::shared_ptr<Agent>> m_Children = {};
+
     public:
         Agent();
         ~Agent() = default;
 
         bool isDead = false;
+        bool wantsToReproduce = false;
 
         void Draw() override;
         void Step(double deltaTime) override;
