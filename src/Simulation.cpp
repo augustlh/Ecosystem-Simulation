@@ -166,7 +166,6 @@ namespace Ecosim
                         std::shared_ptr<Agent> ptr = std::make_shared<Agent>(a);
 
                         ptr->SetId(agent->GetId());
-
                         ptr->SetDna(agent->MutateDNA());
                         ptr->SetColor(agent->GetColor());
                         newAgents.emplace_back(ptr);

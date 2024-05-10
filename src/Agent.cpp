@@ -155,14 +155,14 @@ namespace Ecosim
         else
         {
             auto eatableAgent = std::dynamic_pointer_cast<Agent>(agent);
-            eatableAgent->m_Dna.setEnergy(eatableAgent->m_Dna.getEnergy() + m_Dna.getEnergy() * 0.5 * eatableAgent->m_Dna.getMetabolism());
+            eatableAgent->m_Dna.setEnergy(eatableAgent->m_Dna.getEnergy() + m_Dna.getEnergy() * 0.6 * eatableAgent->m_Dna.getMetabolism());
             OnEaten();
         }
     }
 
     void Agent::Eat(std::shared_ptr<Collidable> &other, CollidableType type)
     {
-        m_Dna.setEnergy(m_Dna.getEnergy() + other->getEnergy() * 0.5 * m_Dna.getMetabolism());
+        m_Dna.setEnergy(m_Dna.getEnergy() + other->getEnergy() * 0.6 * m_Dna.getMetabolism());
         other->OnEaten();
     }
 
@@ -184,6 +184,9 @@ namespace Ecosim
 
     bool Agent::IsEatable(std::shared_ptr<Collidable> &other)
     {
+        if (other->GetId() == m_Id)
+            return false;
+
         const Agent *agent = dynamic_cast<Agent *>(other.get());
         if (agent != nullptr)
         {
