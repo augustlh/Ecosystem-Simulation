@@ -35,6 +35,10 @@ namespace Ecosim
         /// @return The magnitude of the vector
         float Magnitude() const { return std::sqrt(x * x + y * y); }
 
+        /// @brief Returns a copy of this vector
+        /// @return The copy
+        Vector2<T> Copy() { return Vector2<T>(x, y); }
+
         /// @brief Vector-vector addition, returning a new `Vector2<T>`-object
         /// @param other The vector to add to this vector
         /// @return The elementwise sum of the two vectors
