@@ -49,6 +49,10 @@ namespace Ecosim
         /// @return The energy of the food
         float getEnergy() override { return m_Energy; }
 
+        /// @brief Get the id of the food
+        /// @return The id of the food
+        int GetId() override { return -1; }
+
         /// @brief Get the type of the collidable
         /// @return The type of the collidable
         CollidableType getType() { return FOOD; }

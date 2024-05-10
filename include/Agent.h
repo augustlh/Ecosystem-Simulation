@@ -9,6 +9,7 @@
 namespace Ecosim
 {
 
+    /// @brief A struct representing an observation of an agent. The observation contains the closest eatable and enemy objects
     struct Observation
     {
         std::shared_ptr<Collidable> closestEatable;
@@ -23,7 +24,9 @@ namespace Ecosim
         Color m_Color;
         DNA m_Dna;
 
-        std::vector<std::shared_ptr<Agent>> m_Family = {};
+        int m_Id = 0;
+
+        std::vector<std::shared_ptr<Collidable>> m_Family = {};
 
     public:
         Agent();
@@ -41,24 +44,33 @@ namespace Ecosim
         /// @brief Updates the agent one step in the simulation
         void Step(double deltaTime) override;
 
-        // Getters and setters
-        /// @brief Get the energy of the agent
+        /// @brief Gets the energy of the agent
         float getEnergy() override { return m_Dna.getEnergy(); }
 
-        /// @brief Get the color of the agent
+        /// @brief Gets the color of the agent
         Color GetColor() { return m_Color; }
 
-        /// @brief Get the DNA of the agent
+        /// @brief Gets the DNA of the agent
         DNA GetDna() { return m_Dna; }
 
-        /// @brief Set the position of the agent
+        /// @brief Sets the position of the agent
         void SetPosition(Vector2<float> pos) { m_Pos = pos; }
 
-        /// @brief Set the color of the agent
+        /// @brief Sets the color of the agent
         void SetColor(Color color) { m_Color = color; }
 
-        /// @brief Set the DNA of the agent
-        void SetDna(DNA dna) { m_Dna = dna; }
+        /// @brief Sets the DNA of the agent
+        void SetDna(DNA dna)
+        {
+            m_Dna = dna;
+            m_Radius = int(m_Dna.getStrength() / 2);
+        }
+
+        /// @brief Sets the ID of the agent
+        void SetId(int id) { m_Id = id; }
+
+        /// @brief Gets the ID of the agent
+        int GetId() { return m_Id; }
 
         // Collidable interface
         Vector2<float> getPosition() override;
@@ -70,7 +82,6 @@ namespace Ecosim
         void OnEaten() override { isDead = true; }
         int getRadius() override { return m_Radius; }
 
-        /// Agent specific functions
         /// @brief Updates the agent based on the action received
         void OnActionReceived(Vector2<float> &action, double deltaTime);
 
@@ -84,7 +95,7 @@ namespace Ecosim
         Observation CollectObservations();
 
         /// @brief Adds a family member to the agent
-        void AddFamilyMember(std::shared_ptr<Agent> agent) { m_Family.push_back(agent); }
+        void AddFamilyMember(std::shared_ptr<Collidable> agent) { m_Family.push_back(agent); }
 
         /// @brief Eats another collidable object
         void Eat(std::shared_ptr<Collidable> &other, CollidableType type = FOOD);

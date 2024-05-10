@@ -45,7 +45,7 @@ namespace Ecosim
         }
 
         // Check if agent wants to reproduce
-        if (m_Dna.getEnergy() > 100 && m_Dna.getAge() > 10)
+        if (m_Dna.getEnergy() > 125 && m_Dna.getAge() > 10)
         {
             wantsToReproduce = true;
         }
@@ -69,6 +69,11 @@ namespace Ecosim
         // Find closest eatable and enemy by iterating through all collidables
         for (auto &collidable : collidables)
         {
+            if (m_Id == collidable->GetId())
+            {
+                continue;
+            }
+
             float distance = (collidable->getPosition() - m_Pos).Magnitude();
 
             if (IsEatable(collidable) && distance < minEatableDistance)
@@ -138,6 +143,11 @@ namespace Ecosim
 
     void Agent::resolveAgentAgentCollision(std::shared_ptr<Collidable> &agent)
     {
+        if (m_Id == agent->GetId())
+        {
+            return;
+        }
+
         if (IsEatable(agent))
         {
             Eat(agent, AGENT);
@@ -145,15 +155,14 @@ namespace Ecosim
         else
         {
             auto eatableAgent = std::dynamic_pointer_cast<Agent>(agent);
-            eatableAgent->m_Dna.setEnergy(eatableAgent->m_Dna.getEnergy() + m_Dna.getEnergy() * eatableAgent->m_Dna.getMetabolism());
+            eatableAgent->m_Dna.setEnergy(eatableAgent->m_Dna.getEnergy() + m_Dna.getEnergy() * 0.5 * eatableAgent->m_Dna.getMetabolism());
             OnEaten();
         }
     }
 
     void Agent::Eat(std::shared_ptr<Collidable> &other, CollidableType type)
     {
-
-        m_Dna.setEnergy(m_Dna.getEnergy() + other->getEnergy() * m_Dna.getMetabolism());
+        m_Dna.setEnergy(m_Dna.getEnergy() + other->getEnergy() * 0.5 * m_Dna.getMetabolism());
         other->OnEaten();
     }
 

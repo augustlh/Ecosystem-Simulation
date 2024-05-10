@@ -61,7 +61,7 @@ namespace Ecosim
 
             hungerWeight = random(0.6, 1);
 
-            energyDepletionRate = random(speed * 0.25, speed);
+            energyDepletionRate = random(speed * 0.5, speed);
             metabolism = random(0.8, 1.5);
 
             age = 0;
@@ -134,14 +134,14 @@ namespace Ecosim
         {
             DNA mutatedDNA = *this;
 
-            mutatedDNA.setEnergy(100);
+            mutatedDNA.setEnergy(50);
             mutatedDNA.setSearchRadius(mutatedDNA.getSearchRadius() + random(-5, 5));
             mutatedDNA.setSpeed(mutatedDNA.getSpeed() + random(-0.5, 0.5));
             mutatedDNA.setStrength(mutatedDNA.getStrength() + random(-0.5, 0.5));
             mutatedDNA.setFearWeight(mutatedDNA.getFearWeight() + random(-0.1, 0.1));
             mutatedDNA.setHungerWeight(mutatedDNA.getHungerWeight() + random(-0.1, 0.1));
-            mutatedDNA.setEnergyDepletionRate(mutatedDNA.getEnergyDepletionRate() + random(-0.1, 0.1));
-            mutatedDNA.setMetabolism(mutatedDNA.getMetabolism() + random(-0.1, 0.1));
+            mutatedDNA.setEnergyDepletionRate(mutatedDNA.getEnergyDepletionRate() + random(-0.8, 0.8));
+            mutatedDNA.setMetabolism(mutatedDNA.getMetabolism() + random(-0.25, 0.25));
 
             return mutatedDNA;
         }

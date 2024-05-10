@@ -106,6 +106,8 @@ namespace Ecosim
             Agent a{};
             std::shared_ptr<Agent> ptr = std::make_shared<Agent>(a);
 
+            ptr->SetId(i);
+
             renderables.emplace_back(ptr);
             simulatables.emplace_back(ptr);
             collidables.emplace_back(ptr);
@@ -158,18 +160,16 @@ namespace Ecosim
                 {
                     if (agent->wantsToReproduce)
                     {
-                        // agent->Reproduce();
+                        agent->Reproduce();
 
-                        // Agent a{};
-                        // std::shared_ptr<Agent> ptr = std::make_shared<Agent>(a);
+                        Agent a{};
+                        std::shared_ptr<Agent> ptr = std::make_shared<Agent>(a);
 
-                        // ptr->SetDna(agent->MutateDNA());
-                        // ptr->SetColor(agent->GetColor());
+                        ptr->SetId(agent->GetId());
 
-                        // agent->AddFamilyMember(ptr);
-                        // ptr->AddFamilyMember(std::dynamic_pointer_cast<Agent>(*agentIter));
-
-                        // newAgents.emplace_back(ptr);
+                        ptr->SetDna(agent->MutateDNA());
+                        ptr->SetColor(agent->GetColor());
+                        newAgents.emplace_back(ptr);
                     }
 
                     if (agent->isDead)

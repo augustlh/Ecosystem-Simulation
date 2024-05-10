@@ -42,6 +42,9 @@ namespace Ecosim
         /// @brief A destructor to insure sub-classes are properly destructed, if freed through a `Collidable`-pointer
         virtual ~Collidable() = default;
 
+        /// @brief Returns the id of this object
+        virtual int GetId() = 0;
+
         /// @brief Returns the radius of this object
         virtual int getRadius() = 0;
 
