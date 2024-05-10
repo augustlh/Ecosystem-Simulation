@@ -1,7 +1,6 @@
 #ifndef VECTOR2_H
 #define VECTOR2_H
 
-#include <iostream>
 #include <cmath>
 
 namespace Ecosim

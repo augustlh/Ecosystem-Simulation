@@ -96,7 +96,7 @@ namespace Ecosim
         std::vector<std::shared_ptr<Renderable>> renderables;
         std::vector<std::shared_ptr<Simulatable>> simulatables;
 
-        Statistics::Initalize();
+        Statistics::Initialize();
 
         for (int i = 0; i < m_config.numAgents; ++i)
         {

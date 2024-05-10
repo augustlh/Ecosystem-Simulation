@@ -8,6 +8,18 @@
 #include <fstream>
 #include <sstream>
 
+/*
+Data is exported in the format:
+
+`
+Target;x1;x2;...;xn;
+Target_Time;t1;t2;...;tn;
+`
+
+For each target added via `Statistics::Report("Target", x)`
+The time values are the time in ms since the function `Statistics::Initialize()` was called
+*/
+
 using time_point = std::chrono::steady_clock::time_point;
 
 /// @brief A enum describing the datatypes avaliable when storing data
@@ -57,7 +69,7 @@ private:
 
 public:
     /// @brief Sets the timepoint to which all other timepoints will be relative to
-    static void Initalize() { m_initTimestamp = std::chrono::steady_clock::now(); }
+    static void Initialize() { m_initTimestamp = std::chrono::steady_clock::now(); }
 
     /// @brief Calculates the total memory size of the current stored data
     /// @return The size in bytes
