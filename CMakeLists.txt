@@ -7,10 +7,9 @@ project(Ecosystem-Simulation)
 add_subdirectory("external/SDL")
 add_subdirectory("external/MiniYaml")
 
-set(SOURCES
+set(LIB_SOURCES
     "src/Camera.cpp"
     "src/Generation.cpp"
-    "src/Main.cpp"
     "src/Map.cpp"
     "src/Renderer.cpp"
     "src/Simulation.cpp"
@@ -30,12 +29,30 @@ set(HEADERS
     "include/Window.h"
 )
 
-add_executable(Ecosim ${SOURCES} ${HEADERS})
-target_link_libraries(Ecosim SDL3-shared Yaml)
+add_library(EcosimLib SHARED ${LIB_SOURCES} ${HEADERS})
+
+target_include_directories(EcosimLib PRIVATE "include")
+target_include_directories(EcosimLib PRIVATE "external/SDL/include")
+target_include_directories(EcosimLib PRIVATE "external/MiniYaml/include")
+target_include_directories(EcosimLib PRIVATE "external/PerlinNoise/include")
+
+add_executable(Ecosim "src/Main.cpp")
 
 target_include_directories(Ecosim PRIVATE "include")
-target_include_directories(Ecosim PRIVATE "external/SDL/include")
-target_include_directories(Ecosim PRIVATE "external/MiniYaml/include")
-target_include_directories(Ecosim PRIVATE "external/PerlinNoise/include")
+
+target_link_libraries(Ecosim EcosimLib SDL3-shared Yaml)
 
 add_custom_target(run COMMAND Ecosim DEPENDS Ecosim WORKING_DIRECTORY ${CMAKE_PROJECT_DIR})
+
+# Unit testing
+
+file(GLOB TEST_SOURCES "tests/*.cpp")
+
+foreach(TEST_SOURCE ${TEST_SOURCES})
+    get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
+    add_executable(${TEST_NAME} ${TEST_SOURCE})
+    target_link_libraries(${TEST_NAME} EcosimLib)
+    target_include_directories(${TEST_NAME} PRIVATE "include")
+    target_include_directories(${TEST_NAME} PRIVATE "tests")
+    set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
+endforeach()
