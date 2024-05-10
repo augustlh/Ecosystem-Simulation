@@ -11,7 +11,7 @@ namespace Ecosim
 
     void Food::Draw()
     {
-        Renderer::Circle(m_Pos.Convert<int>(), 2, Color(0, 255, 20));
+        Renderer::Circle(m_Pos.Convert<int>(), m_Radius, Color(0, 255, 20));
     }
 
     void Food::handleCollision(std::shared_ptr<Collidable> &other) {}
@@ -24,5 +24,10 @@ namespace Ecosim
     void Food::Respawn()
     {
         m_Pos = Vector2<float>(rand() % 800, rand() % 800);
+    }
+
+    void Food::OnEaten()
+    {
+        Respawn();
     }
 }

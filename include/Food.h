@@ -5,11 +5,12 @@
 
 namespace Ecosim
 {
-    class Food : public Collidable, public Renderable, public Eatable
+    class Food : public Collidable, public Renderable
     {
     private:
         /// @brief The position of the food
         Vector2<float> m_Pos;
+        int m_Radius = 2;
 
         /// @brief The energy of the food
         float m_Energy;
@@ -34,6 +35,13 @@ namespace Ecosim
         /// @return The position of the food
         Vector2<float> getPosition() override { return m_Pos; }
 
+        /// @brief Get the radius of the food
+        /// @return The radius of the food
+        int getRadius() override { return m_Radius; }
+
+        /// @brief Handle the food being eaten
+        void OnEaten() override;
+
         /// @brief Respawn the food at a random location
         void Respawn();
 
@@ -46,5 +54,4 @@ namespace Ecosim
         CollidableType getType() { return FOOD; }
     };
 }
-
 #endif /* FOOD_H */

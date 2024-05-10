@@ -10,20 +10,25 @@ namespace Ecosim
     Agent::Agent()
     {
         m_Pos = Vector2<float>(rand() % 800, rand() % 800);
-        m_Radius = 3;
         m_Dna = DNA();
+        m_Radius = int(m_Dna.getStrength() / 2);
         m_Color = Color(rand() % 255, rand() % 255, rand() % 255);
     }
 
-    /// @brief Draw agent on screen
     void Agent::Draw()
     {
-        Renderer::Circle(m_Pos.Convert<int>(), 3, m_Color);
+        Renderer::Circle(m_Pos.Convert<int>(), m_Radius, m_Color);
     }
 
-    /// @brief Ask agent to take a step in the simulation
-    /// @param deltaTime
     void Agent::Step(double deltaTime)
+    {
+        UpdateAgent(deltaTime);
+        Observation obs = CollectObservations();
+        Vector2<float> action = RequestAction(obs);
+        OnActionReceived(action, deltaTime);
+    }
+
+    void Agent::UpdateAgent(double deltaTime)
     {
         // Update age and energy
         m_Dna.setAge(m_Dna.getAge() + deltaTime);
@@ -34,7 +39,7 @@ namespace Ecosim
         {
             if (isDead == false)
             {
-                Kill();
+                isDead = true;
             }
             return;
         }
@@ -44,13 +49,10 @@ namespace Ecosim
         {
             wantsToReproduce = true;
         }
+    }
 
-        // Wrap the agent around the screen with modulo
-        m_Pos.x = fmod(m_Pos.x, 800);
-        m_Pos.y = fmod(m_Pos.y, 800);
-
-        Vector2<float> direction = Vector2<float>(0, 0);
-
+    Observation Agent::CollectObservations()
+    {
         // Find cloest object that is neither stronger than you, nor in family.
         std::vector<std::shared_ptr<Collidable>> collidables;
         CollisionHandler::Query(m_Pos, m_Dna.getSearchRadius(), collidables);
@@ -60,86 +62,58 @@ namespace Ecosim
                                          { return a.get() == this; }),
                           collidables.end());
 
-        // Sort collidables by distance to agent
-        std::sort(collidables.begin(), collidables.end(), [this](std::shared_ptr<Collidable> a, std::shared_ptr<Collidable> b)
-                  { return (a->getPosition() - m_Pos).SquareMagnitude() < (b->getPosition() - m_Pos).SquareMagnitude(); });
+        Observation obs;
+        float minEatableDistance = std::numeric_limits<float>::max();
+        float minAvoidDistance = std::numeric_limits<float>::max();
 
-        // Closest eatable object and cloest object to avoid
-        std::shared_ptr<Collidable> closestEatable = nullptr;
-        std::shared_ptr<Collidable> closestAvoid = nullptr;
-
-        std::vector<std::shared_ptr<Collidable>> children;
-
+        // Find closest eatable and enemy by iterating through all collidables
         for (auto &collidable : collidables)
         {
-            // Base case
-            if (closestEatable != nullptr && closestAvoid != nullptr)
+            float distance = (collidable->getPosition() - m_Pos).Magnitude();
+
+            if (IsEatable(collidable) && distance < minEatableDistance)
             {
-                break;
+                obs.closestEatable = collidable;
+                minEatableDistance = distance;
             }
 
-            // Skip iteration if collidable is of its own kind
-            if (std::find(children.begin(), children.end(), collidable) != children.end())
+            if (!IsEatable(collidable) && distance < minAvoidDistance)
             {
-                continue;
-            }
-
-            // Check if collidable can be eaten (agent or food). If it can't be eaten check if it should be avoided.
-            if (closestEatable == nullptr)
-            {
-                if (collidable->getType() == AGENT)
-                {
-                    auto agent = std::dynamic_pointer_cast<Agent>(collidable);
-                    if (agent->m_Dna.getStrength() * agent->getEnergy() < m_Dna.getStrength() * getEnergy())
-                    {
-                        closestEatable = collidable;
-                        continue;
-                    }
-                }
-
-                else if (collidable->getType() == FOOD)
-                {
-                    closestEatable = collidable;
-                    continue;
-                }
-            }
-
-            if (closestAvoid == nullptr)
-            {
-                if (collidable->getType() == AGENT)
-                {
-                    auto agent = std::dynamic_pointer_cast<Agent>(collidable);
-                    if (agent->m_Dna.getStrength() * agent->getEnergy() > m_Dna.getStrength() * getEnergy())
-                    {
-                        closestAvoid = collidable;
-                        continue;
-                    }
-                }
+                obs.closestEnemy = collidable;
+                minAvoidDistance = distance;
             }
         }
 
-        if (closestEatable != nullptr)
-        {
-            direction += (closestEatable->getPosition() - m_Pos).Normalize() * m_Dna.getHungerWeight();
-        }
-
-        if (closestAvoid != nullptr)
-        {
-            direction += (m_Pos - closestAvoid->getPosition()).Normalize() * m_Dna.getFearWeight();
-        }
-
-        if (direction.Magnitude() == 0)
-        {
-            direction = Vector2<float>(rand() % 12 - 1, rand() % 12 - 1).Normalize();
-        }
-
-        Move(direction, deltaTime);
+        return obs;
     }
 
-    /// @brief Move agent in a direction, direction needs to be normalized
-    void Agent::Move(Vector2<float> direction, double deltaTime)
+    Vector2<float> Agent::RequestAction(Observation &observation)
     {
-        m_Pos += direction * m_Dna.getSpeed() * 10 * deltaTime;
+        Vector2<float> action = Vector2<float>(0, 0);
+        if (observation.closestEatable != nullptr)
+        {
+            action += (observation.closestEatable->getPosition() - m_Pos).Normalize() * m_Dna.getHungerWeight();
+        }
+
+        if (observation.closestEnemy != nullptr)
+        {
+            action += (m_Pos - observation.closestEnemy->getPosition()).Normalize() * m_Dna.getFearWeight();
+        }
+
+        if (action.Magnitude() == 0)
+        {
+            action = Vector2<float>(rand() % 12 - 1, rand() % 12 - 1).Normalize();
+        }
+
+        return action;
+    }
+
+    void Agent::OnActionReceived(Vector2<float> &action, double deltaTime)
+    {
+        m_Pos += action * m_Dna.getSpeed() * 10 * deltaTime;
+
+        m_Pos.x = fmod(m_Pos.x, 800 - m_Radius);
+        m_Pos.y = fmod(m_Pos.y, 800 - m_Radius);
     }
 
     void Agent::handleCollision(std::shared_ptr<Collidable> &other)
@@ -164,43 +138,28 @@ namespace Ecosim
 
     void Agent::resolveAgentAgentCollision(std::shared_ptr<Collidable> &agent)
     {
-        auto eatableAgent = std::dynamic_pointer_cast<Agent>(agent);
-
-        if (m_Dna.getStrength() * m_Dna.getEnergy() > eatableAgent->m_Dna.getStrength() * eatableAgent->m_Dna.getEnergy())
+        if (IsEatable(agent))
         {
             Eat(agent, AGENT);
         }
         else
         {
+            auto eatableAgent = std::dynamic_pointer_cast<Agent>(agent);
             eatableAgent->m_Dna.setEnergy(eatableAgent->m_Dna.getEnergy() + m_Dna.getEnergy() * eatableAgent->m_Dna.getMetabolism());
-            Kill();
+            OnEaten();
         }
     }
 
     void Agent::Eat(std::shared_ptr<Collidable> &other, CollidableType type)
     {
 
-        std::shared_ptr<Eatable> eatable = std::dynamic_pointer_cast<Eatable>(other);
-        if (eatable)
-        {
-            m_Dna.setEnergy(m_Dna.getEnergy() + eatable->getEnergy() * m_Dna.getMetabolism());
-            if (type == AGENT)
-            {
-                std::dynamic_pointer_cast<Agent>(other)->Kill();
-                return;
-            }
-
-            if (type == FOOD)
-            {
-                std::dynamic_pointer_cast<Food>(other)->Respawn();
-                return;
-            }
-        }
+        m_Dna.setEnergy(m_Dna.getEnergy() + other->getEnergy() * m_Dna.getMetabolism());
+        other->OnEaten();
     }
 
     bool Agent::Collides(std::shared_ptr<Collidable> &other)
     {
-        return (m_Pos - other->getPosition()).Magnitude() < m_Radius * 2;
+        return (m_Pos - other->getPosition()).Magnitude() < m_Radius + other->getRadius();
     }
 
     Vector2<float> Agent::getPosition()
@@ -208,4 +167,19 @@ namespace Ecosim
         return m_Pos;
     }
 
+    void Agent::Reproduce()
+    {
+        m_Dna.setEnergy(m_Dna.getEnergy() / 2);
+        wantsToReproduce = false;
+    }
+
+    bool Agent::IsEatable(std::shared_ptr<Collidable> &other)
+    {
+        const Agent *agent = dynamic_cast<Agent *>(other.get());
+        if (agent != nullptr)
+        {
+            return m_Dna.getStrength() > agent->m_Dna.getStrength();
+        }
+        return true;
+    }
 }

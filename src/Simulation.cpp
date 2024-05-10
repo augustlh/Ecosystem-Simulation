@@ -148,12 +148,30 @@ namespace Ecosim
 
             double deltaTime = (thisFrame - lastFrame) * 0.001;
 
+            std::vector<std::shared_ptr<Agent>> newAgents;
+
             /* Scuffed isDead*/
             auto agentIter = simulatables.begin();
             while (agentIter != simulatables.end())
             {
                 if (auto agent = dynamic_cast<Agent *>(agentIter->get()))
                 {
+                    if (agent->wantsToReproduce)
+                    {
+                        // agent->Reproduce();
+
+                        // Agent a{};
+                        // std::shared_ptr<Agent> ptr = std::make_shared<Agent>(a);
+
+                        // ptr->SetDna(agent->MutateDNA());
+                        // ptr->SetColor(agent->GetColor());
+
+                        // agent->AddFamilyMember(ptr);
+                        // ptr->AddFamilyMember(std::dynamic_pointer_cast<Agent>(*agentIter));
+
+                        // newAgents.emplace_back(ptr);
+                    }
+
                     if (agent->isDead)
                     {
                         agentIter = simulatables.erase(agentIter);
@@ -180,6 +198,13 @@ namespace Ecosim
                 }
             }
             /* Scuffed isDead*/
+
+            for (const auto &agent : newAgents)
+            {
+                renderables.emplace_back(agent);
+                simulatables.emplace_back(agent);
+                collidables.emplace_back(agent);
+            }
 
             for (const auto &simulatable : simulatables)
                 simulatable->Step(deltaTime);

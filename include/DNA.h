@@ -14,9 +14,6 @@ namespace Ecosim
         /// @brief maximum age of the agent.
         float maxAge;
 
-        /// @brief The health of the agent.
-        double health;
-
         /// @brief The energy of the agent.
         double energy;
 
@@ -53,7 +50,6 @@ namespace Ecosim
         /// @brief Initialize the DNA of the agent.
         void Initialize()
         {
-            health = 100;
             energy = 100;
 
             speed = random(2.5, 4);
@@ -75,9 +71,6 @@ namespace Ecosim
     public:
         DNA() { Initialize(); }
         ~DNA() = default;
-
-        /// @brief Get the health of the agent.
-        double getHealth() const { return health; }
 
         /// @brief Get the energy of the agent.
         double getEnergy() const { return energy; }
@@ -102,9 +95,6 @@ namespace Ecosim
 
         /// @brief Get the metabolism of the agent.
         double getMetabolism() const { return metabolism; }
-
-        /// @brief Set the health of the agent.
-        void setHealth(double health) { this->health = health; }
 
         /// @brief Set the energy of the agent.
         void setEnergy(double energy) { this->energy = energy; }
@@ -144,8 +134,7 @@ namespace Ecosim
         {
             DNA mutatedDNA = *this;
 
-            mutatedDNA.setHealth(mutatedDNA.getHealth() + random(-5, 5));
-            mutatedDNA.setEnergy(mutatedDNA.getEnergy() + random(-5, 5));
+            mutatedDNA.setEnergy(100);
             mutatedDNA.setSearchRadius(mutatedDNA.getSearchRadius() + random(-5, 5));
             mutatedDNA.setSpeed(mutatedDNA.getSpeed() + random(-0.5, 0.5));
             mutatedDNA.setStrength(mutatedDNA.getStrength() + random(-0.5, 0.5));
