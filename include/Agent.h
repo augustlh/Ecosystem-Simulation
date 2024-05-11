@@ -26,8 +26,6 @@ namespace Ecosim
 
         int m_Id = 0;
 
-        std::vector<std::shared_ptr<Collidable>> m_Family = {};
-
     public:
         Agent();
         ~Agent() = default;
@@ -93,9 +91,6 @@ namespace Ecosim
 
         /// @brief Collects observations from the agent to be used in the RequestAction method
         Observation CollectObservations();
-
-        /// @brief Adds a family member to the agent
-        void AddFamilyMember(std::shared_ptr<Collidable> agent) { m_Family.push_back(agent); }
 
         /// @brief Eats another collidable object
         void Eat(std::shared_ptr<Collidable> &other, CollidableType type = FOOD);

@@ -55,7 +55,7 @@ namespace Ecosim
 
         /// @brief Get the type of the collidable
         /// @return The type of the collidable
-        CollidableType getType() { return FOOD; }
+        CollidableType getType() override { return FOOD; }
     };
 }
 #endif /* FOOD_H */
