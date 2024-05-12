@@ -15,7 +15,7 @@ namespace Ecosim
         T x, y;
 
         /// @brief Initializes both coordinates to zero
-        Vector2() = default;
+        Vector2() : x(0), y(0){};
 
         /// @brief Initializes both coordinates to a single value given by `_n`
         /// @param _n The value to set for both coordinates
@@ -31,6 +31,11 @@ namespace Ecosim
         /// @return A copy of this vector with its coords converted to `R`
         template <typename R>
         Vector2<R> Convert() const { return Vector2<R>(static_cast<R>(x), static_cast<R>(y)); }
+
+        /// @brief Calculates the dot-product between two vectors
+        /// @param other The other vector
+        /// @return The dot-product
+        T Dot(Vector2<T> &other) const { return x * other.x + y * other.y; }
 
         /// @return The magnitude of the vector
         float Magnitude() const { return std::sqrt(x * x + y * y); }

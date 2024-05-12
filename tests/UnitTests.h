@@ -4,17 +4,17 @@
 #include <iostream>
 #include <stdlib.h>
 
-#define TEST_FUNCTION(func)                        \
-    {                                              \
-        std::cout << "Testing: " << #func << '\n'; \
-        func();                                    \
+#define TEST_FUNCTION(func)                          \
+    {                                                \
+        std::cout << "  Testing: " << #func << '\n'; \
+        func();                                      \
     }
 
-#define FAIL_IF_FALSE(cond, testid)                                                        \
-    {                                                                                      \
-        std::cout << "\t[" << ((cond) ? "SUCCESS" : "FAILURE") << "]  " << testid << "\n"; \
-        if (!(cond))                                                                       \
-            exit(-1);                                                                      \
+#define FAIL_IF_FALSE(cond, testid)                                                          \
+    {                                                                                        \
+        std::cout << "    [" << ((cond) ? "SUCCESS" : "FAILURE") << "]  " << testid << '\n'; \
+        if (!(cond))                                                                         \
+            exit(-1);                                                                        \
     }
 
 #endif /* UNITTESTS_H */
