@@ -36,11 +36,9 @@ namespace Ecosim
 
     void Agent::UpdateAgent(double deltaTime)
     {
-        // Update age and energy
         m_Dna.setAge(m_Dna.getAge() + deltaTime);
         m_Dna.setEnergy(m_Dna.getEnergy() - m_Dna.getEnergyDepletionRate() * deltaTime);
 
-        // Check if agent is dead
         if (m_Dna.getEnergy() <= 0 || m_Dna.getAge() >= m_Dna.getMaxAge())
         {
             if (isDead == false)
@@ -51,7 +49,6 @@ namespace Ecosim
             return;
         }
 
-        // Check if agent wants to reproduce
         if (m_Dna.getEnergy() > 125 && m_Dna.getAge() > 10)
         {
             wantsToReproduce = true;
@@ -60,11 +57,9 @@ namespace Ecosim
 
     Observation Agent::CollectObservations()
     {
-        // Find cloest object that is neither stronger than you, nor in family.
         std::vector<std::shared_ptr<Collidable>> collidables;
         CollisionHandler::Query(m_Pos, m_Dna.getSearchRadius(), collidables);
 
-        // Remove self from collidables
         collidables.erase(std::remove_if(collidables.begin(), collidables.end(), [this](std::shared_ptr<Collidable> a)
                                          { return a.get() == this; }),
                           collidables.end());
@@ -73,7 +68,6 @@ namespace Ecosim
         float minEatableDistance = std::numeric_limits<float>::max();
         float minAvoidDistance = std::numeric_limits<float>::max();
 
-        // Find closest eatable and enemy by iterating through all collidables
         for (auto &collidable : collidables)
         {
             if (m_Id == collidable->GetId())

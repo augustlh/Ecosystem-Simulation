@@ -238,7 +238,51 @@ namespace Ecosim
 
         Map::Cleanup();
 
+        // int numAgents = 0;
+
+        // float averageSpeed = 0;
+        // float averageStrength = 0;
+        // float averageSearchRadius = 0;
+        // float averageFear = 0;
+        // float averageFoodAttraction = 0;
+        // float averageMetabolism = 0;
+        // float averageEnergyDepletionRate = 0;
+
+        // for (const auto &agent : simulatables)
+        // {
+        //     if (auto a = dynamic_cast<Agent *>(agent.get()))
+        //     {
+        //         averageSpeed += a->GetDna().getSpeed();
+        //         averageStrength += a->GetDna().getStrength();
+        //         averageSearchRadius += a->GetDna().getSearchRadius();
+        //         averageFear += a->GetDna().getFearWeight();
+        //         averageFoodAttraction += a->GetDna().getHungerWeight();
+        //         averageMetabolism += a->GetDna().getMetabolism();
+        //         averageEnergyDepletionRate += a->GetDna().getEnergyDepletionRate();
+
+        //         numAgents++;
+        //     }
+        // }
+
+        // averageSpeed /= numAgents;
+        // averageStrength /= numAgents;
+        // averageSearchRadius /= numAgents;
+        // averageFear /= numAgents;
+        // averageFoodAttraction /= numAgents;
+        // averageMetabolism /= numAgents;
+        // averageEnergyDepletionRate /= numAgents;
+
+        // Statistics::Report("AverageSpeed", averageSpeed);
+        // Statistics::Report("AverageStrength", averageStrength);
+        // Statistics::Report("AverageSearchRadius", averageSearchRadius);
+        // Statistics::Report("AverageFear", averageFear);
+        // Statistics::Report("AverageFoodAttraction", averageFoodAttraction);
+        // Statistics::Report("AverageMetabolism", averageMetabolism);
+        // Statistics::Report("AverageEnergyDepletionRate", averageEnergyDepletionRate);
+
         if (m_config.storeData)
-            Statistics::Export("FoodData");
+        {
+            // Statistics::Export("FoodData");
+        }
     }
 }

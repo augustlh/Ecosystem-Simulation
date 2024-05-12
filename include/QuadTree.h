@@ -7,6 +7,8 @@
 #include "Vector2.h"
 #include "Interfaces.h"
 
+// Implementeringen af QuadTree er inspireret af https://www.youtube.com/watch?v=OJxEcs0w_kE. Dog er den skabt på egen hånd og tilpasset til projektet.
+
 namespace Ecosim
 {
     class Node

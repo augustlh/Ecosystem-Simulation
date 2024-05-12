@@ -1,10 +1,10 @@
 #include "QuadTree.h"
 #include "Renderer.h"
 
+// Implementeringen af QuadTree er inspireret af https://www.youtube.com/watch?v=OJxEcs0w_kE. Dog er den skabt på egen hånd og tilpasset til projektet.
+
 namespace Ecosim
 {
-    /// @brief Check if this node contains a point
-    /// @param point The point to check
     bool Node::Contains(Vector2<float> &point)
     {
         float margin = std::numeric_limits<float>::epsilon() * 2.0f;
@@ -14,8 +14,6 @@ namespace Ecosim
                m_Pos.y + m_Width / 2 >= point.y - margin;
     }
 
-    /// @brief Check if this node intersects with another node
-    /// @param other The node to check against
     bool Node::IntersectsNode(Node &other)
     {
         float margin = std::numeric_limits<float>::epsilon() * 2.0f;
@@ -25,7 +23,6 @@ namespace Ecosim
                m_Pos.y + m_Width / 2 >= other.m_Pos.y - other.m_Width / 2 - margin;
     }
 
-    /// @brief Render the node
     void Node::Render()
     {
         Vector2<float> halfSize(static_cast<float>(m_Width) / 2, static_cast<float>(m_Width) / 2);
@@ -40,8 +37,6 @@ namespace Ecosim
         Renderer::Line(bottomLeft.Convert<int>(), topLeft.Convert<int>(), 1, Color(255, 255, 255));
     }
 
-    /// @brief Insert a collidable object into the quadtree
-    /// @param collidable The collidable object to insert
     bool QuadTree::Insert(std::shared_ptr<Collidable> collidable)
     {
         if (!m_Boundary.Contains(collidable->getPosition()))
@@ -71,7 +66,6 @@ namespace Ecosim
         return false;
     }
 
-    /// @brief Subdivide the quadtree into 4 children
     void QuadTree::Subdivide()
     {
         int width = m_Boundary.GetWidth() / 2;
@@ -84,9 +78,6 @@ namespace Ecosim
         m_Children[3] = std::make_unique<QuadTree>(Node(Vector2<float>(pos.x + width / 2, pos.y + width / 2), width));
     }
 
-    /// @brief Query the quadtree for collidables within a range
-    /// @param range The range to query
-    /// @param found The vector to store the found collidables
     void QuadTree::Query(Node &range, std::vector<std::shared_ptr<Collidable>> &found)
     {
         if (!m_Boundary.IntersectsNode(range))
@@ -111,7 +102,6 @@ namespace Ecosim
         }
     }
 
-    /// @brief Clear the quadtree. Resets the QuadTree to its initial state
     void QuadTree::Clear()
     {
         m_Collidables.clear();
@@ -128,7 +118,6 @@ namespace Ecosim
         m_Children.resize(4);
     }
 
-    /// @brief Render the quadtree
     void QuadTree::Render()
     {
         m_Boundary.Render();
