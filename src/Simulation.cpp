@@ -168,6 +168,7 @@ namespace Ecosim
                         ptr->SetId(agent->GetId());
                         ptr->SetDna(agent->MutateDNA());
                         ptr->SetColor(agent->GetColor());
+                        ptr->SetPosition(agent->getPosition() + Vector2<float>(10, rand() % 20 - 10));
                         newAgents.emplace_back(ptr);
                     }
 

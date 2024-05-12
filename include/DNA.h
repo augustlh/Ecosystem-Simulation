@@ -62,10 +62,10 @@ namespace Ecosim
             hungerWeight = random(0.6, 1);
 
             energyDepletionRate = random(speed * 0.5, speed);
-            metabolism = random(0.8, 1.5);
+            metabolism = random(0.1, 1);
 
             age = 0;
-            maxAge = random(100, 200);
+            maxAge = random(300, 600);
         }
 
     public:

@@ -23,6 +23,12 @@ namespace Ecosim
     void Agent::Step(double deltaTime)
     {
         UpdateAgent(deltaTime);
+
+        if (m_Dna.getAge() < 0.25)
+        {
+            return;
+        }
+
         Observation obs = CollectObservations();
         Vector2<float> action = RequestAction(obs);
         OnActionReceived(action, deltaTime);
@@ -39,6 +45,7 @@ namespace Ecosim
         {
             if (isDead == false)
             {
+                std::cout << "Agent " << m_Id << " died at age " << m_Dna.getAge() << " with energy " << m_Dna.getEnergy() << std::endl;
                 isDead = true;
             }
             return;
@@ -155,14 +162,14 @@ namespace Ecosim
         else
         {
             auto eatableAgent = std::dynamic_pointer_cast<Agent>(agent);
-            eatableAgent->m_Dna.setEnergy(eatableAgent->m_Dna.getEnergy() + m_Dna.getEnergy() * 0.6 * eatableAgent->m_Dna.getMetabolism());
+            eatableAgent->m_Dna.setEnergy(eatableAgent->m_Dna.getEnergy() + m_Dna.getEnergy() * eatableAgent->m_Dna.getMetabolism());
             OnEaten();
         }
     }
 
     void Agent::Eat(std::shared_ptr<Collidable> &other, CollidableType type)
     {
-        m_Dna.setEnergy(m_Dna.getEnergy() + other->getEnergy() * 0.6 * m_Dna.getMetabolism());
+        m_Dna.setEnergy(m_Dna.getEnergy() + other->getEnergy() * m_Dna.getMetabolism());
         other->OnEaten();
     }
 
