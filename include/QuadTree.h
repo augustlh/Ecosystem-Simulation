@@ -53,7 +53,7 @@ namespace Ecosim
     {
     private:
         /// @brief The maximum number of collidables in a node before it subdivides
-        const int QT_NODE_CAPACITY = 4;
+        const int capacity = 4;
 
         /// @brief  The boundary of the node
         Node m_Boundary;

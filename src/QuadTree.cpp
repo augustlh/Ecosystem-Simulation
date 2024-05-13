@@ -44,7 +44,7 @@ namespace Ecosim
             return false;
         }
 
-        if (m_Collidables.size() < QT_NODE_CAPACITY && m_Children[0] == nullptr)
+        if (m_Collidables.size() < capacity && m_Children[0] == nullptr)
         {
             m_Collidables.push_back(collidable);
             return true;
