@@ -8,4 +8,18 @@ typedef unsigned int uint;
 
 #include <SDL3/SDL.h>
 
+#ifdef _WIN32
+
+#ifdef ECOSIM_EXPORT
+#define ECOSIM_API __declspec(dllexport)
+#else
+#define ECOSIM_API __declspec(dllimport)
+#endif
+
+#else
+
+#define ECOSIM_API
+
+#endif /* _WIN32 */
+
 #endif /* ECOSIM_H */

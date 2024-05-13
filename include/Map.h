@@ -28,7 +28,7 @@ namespace Ecosim
     };
 
     /// @brief A container for a `enviroments/config.yaml` config file
-    class EnviromentConfig
+    class ECOSIM_API EnviromentConfig
     {
     public:
         uint seed;
@@ -56,16 +56,16 @@ namespace Ecosim
     {
     private:
         /// @brief The enviroment config
-        static EnviromentConfig m_config;
+        ECOSIM_API static EnviromentConfig m_config;
 
         /// @brief An array of uints, each value containing the index to a biome in `m_config.biomes`
-        static std::vector<uint> m_biomeMap;
+        ECOSIM_API static std::vector<uint> m_biomeMap;
 
         /// @brief An array of floats, each in the interval 0..1 representing the height of the world
-        static std::vector<float> m_heightMap;
+        ECOSIM_API static std::vector<float> m_heightMap;
 
         /// @brief An actual SDL_Surface for drawing the map to the screen
-        static SDL_Surface *m_surface;
+        ECOSIM_API static SDL_Surface *m_surface;
 
     public:
         /// @brief Delete constructor to prevent creating a instance of the Map class
@@ -73,38 +73,38 @@ namespace Ecosim
 
         /// @brief Create a map given a c++-style string to an enviroment config
         /// @param configPath A valid filepath
-        static void Create(std::string &configPath) { Create(configPath.c_str()); }
+        ECOSIM_API static void Create(std::string &configPath) { Create(configPath.c_str()); }
 
         /// @brief Create a map given a null-terminated string to an enviroment config
         /// @param configPath A valid filepath
-        static void Create(const char *configPath);
+        ECOSIM_API static void Create(const char *configPath);
 
         /// @brief Deletes the SDL_Surface used for rendering the map
-        static void Cleanup() { SDL_DestroySurface(m_surface); }
+        ECOSIM_API static void Cleanup() { SDL_DestroySurface(m_surface); }
 
         /// @brief Render the map to the screen
-        static void Render() { Renderer::Surface(0, 0, m_surface); }
+        ECOSIM_API static void Render() { Renderer::Surface(0, 0, m_surface); }
 
         /// @return Return the width of the map
-        static uint Width() { return m_config.mapWidth; }
+        ECOSIM_API static uint Width() { return m_config.mapWidth; }
 
         /// @return Return the height of the map
-        static uint Height() { return m_config.mapHeight; }
+        ECOSIM_API static uint Height() { return m_config.mapHeight; }
 
         /// @brief Get the biome at a certain coordinate
         /// @param coord The coordinate to check
         /// @return A reference to a `BiomeType`
-        static BiomeType &BiomeAt(Vector2<int> coord);
+        ECOSIM_API static BiomeType &BiomeAt(Vector2<int> coord);
 
         /// @brief Get the height at a certain coordinate
         /// @param coord The coordinate to check
         /// @return The height as a float
-        static float HeightAt(Vector2<int> coord);
+        ECOSIM_API static float HeightAt(Vector2<int> coord);
 
         /// @brief Check if there is water at a certain coordinate
         /// @param coord The coordinate to check
         /// @return Whether or not there is water
-        static bool WaterAt(Vector2<int> coord);
+        ECOSIM_API static bool WaterAt(Vector2<int> coord);
     };
 }
 

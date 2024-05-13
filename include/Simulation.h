@@ -9,7 +9,7 @@ typedef unsigned int uint;
 namespace Ecosim
 {
     /// @brief A container for a `simulations/config.yaml` config file
-    class SimulationConfig
+    class ECOSIM_API SimulationConfig
     {
     public:
         /// @brief The name of a simulation
@@ -43,7 +43,7 @@ namespace Ecosim
     };
 
     /// @brief An instance of a simulation
-    class Simulation
+    class ECOSIM_API Simulation
     {
     private:
         /// @brief A window to display the simulation

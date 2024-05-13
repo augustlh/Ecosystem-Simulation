@@ -1,6 +1,8 @@
 #ifndef INTERFACES_H
 #define INTERFACES_H
 
+#include "Ecosim.h"
+
 namespace Ecosim
 {
     /// @brief An interface for all objects that can be rendered to the screen

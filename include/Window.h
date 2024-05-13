@@ -6,7 +6,7 @@
 namespace Ecosim
 {
     /// @brief An SDL_Window wrapper
-    class Window
+    class ECOSIM_API Window
     {
     private:
         /// @brief A pointer to the SDL_Window

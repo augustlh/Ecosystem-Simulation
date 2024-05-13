@@ -9,7 +9,7 @@
 namespace Ecosim
 {
     /// @brief A struct representing a RGB-color
-    struct Color
+    struct ECOSIM_API Color
     {
         /// @brief The red, green, and blue component of the color
         uint8_t r, g, b;
@@ -39,7 +39,7 @@ namespace Ecosim
     };
 
     /// @brief A class for rendering basic shapes and textures to the screen
-    class Renderer
+    class ECOSIM_API Renderer
     {
     private:
         /// @brief The SDL window to renderer to

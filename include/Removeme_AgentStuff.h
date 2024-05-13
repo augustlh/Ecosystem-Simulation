@@ -1,13 +1,14 @@
 #ifndef AGENTSTUFF_H
 #define AGENTSTUFF_H
 
+#include "Ecosim.h"
 #include "Interfaces.h"
 #include "Vector2.h"
 #include "Renderer.h"
 
 namespace Ecosim::Temp
 {
-    class Agent : public Renderable, public Simulatable
+    class ECOSIM_API Agent : public Renderable, public Simulatable
     {
     private:
         Vector2<float> m_pos;
@@ -33,7 +34,7 @@ namespace Ecosim::Temp
         }
     };
 
-    class Food : public Renderable
+    class ECOSIM_API Food : public Renderable
     {
     public:
         Vector2<int> pos;

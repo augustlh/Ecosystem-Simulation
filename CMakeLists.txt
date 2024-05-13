@@ -35,12 +35,13 @@ target_include_directories(EcosimLib PRIVATE "include")
 target_include_directories(EcosimLib PRIVATE "external/SDL/include")
 target_include_directories(EcosimLib PRIVATE "external/MiniYaml/include")
 target_include_directories(EcosimLib PRIVATE "external/PerlinNoise/include")
+target_link_libraries(EcosimLib SDL3-shared Yaml)
+target_compile_definitions(EcosimLib PRIVATE "ECOSIM_EXPORT")
 
 add_executable(Ecosim "src/Main.cpp")
 
 target_include_directories(Ecosim PRIVATE "include")
-
-target_link_libraries(Ecosim EcosimLib SDL3-shared Yaml)
+target_link_libraries(Ecosim EcosimLib)
 
 add_custom_target(run COMMAND Ecosim DEPENDS Ecosim WORKING_DIRECTORY ${CMAKE_PROJECT_DIR})
 
