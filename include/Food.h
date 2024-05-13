@@ -5,6 +5,7 @@
 
 namespace Ecosim
 {
+    /// @brief A class representing food in the simulation
     class Food : public Collidable, public Renderable
     {
     private:
@@ -16,7 +17,10 @@ namespace Ecosim
         float m_Energy;
 
     public:
+        /// @brief Default constructor
         Food();
+
+        /// @brief Default destructor
         ~Food() = default;
 
         /// @brief Draw the food on the screen

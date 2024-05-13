@@ -6,9 +6,11 @@
 #include "Interfaces.h"
 #include "Vector2.h"
 #include "QuadTree.h"
+#include "Ecosim.h"
 
 namespace Ecosim
 {
+    /// @brief A class for handling collisions between collidable objects in the simulation
     class CollisionHandler
     {
     public:
