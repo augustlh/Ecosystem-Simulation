@@ -2,6 +2,7 @@
 #define INTERFACES_H
 
 #include "Ecosim.h"
+#include "Vector2.h"
 
 namespace Ecosim
 {

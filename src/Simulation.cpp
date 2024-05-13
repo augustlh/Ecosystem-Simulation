@@ -270,7 +270,6 @@ namespace Ecosim
                 Renderer::RenderFrame();
             }
 
-            // CollisionHandler::SetCollidables(collidables);
             CollisionHandler::Rebuild();
             CollisionHandler::CheckCollisions();
         }
