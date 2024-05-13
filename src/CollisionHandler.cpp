@@ -29,7 +29,7 @@ namespace Ecosim
         for (auto &collidable : *m_Collidables)
         {
             // If the collidable is a food object, skip the current iteration. If collisions are checked for agents, food will naturally also be checked.
-            if (std::dynamic_pointer_cast<Food>(collidable))
+            if (collidable->getType() == CollidableType::FOOD)
             {
                 continue;
             }

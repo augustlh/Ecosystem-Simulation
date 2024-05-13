@@ -23,12 +23,6 @@ namespace Ecosim
     void Agent::Step(double deltaTime)
     {
         UpdateAgent(deltaTime);
-
-        if (m_Dna.getAge() < 0.25)
-        {
-            return;
-        }
-
         Observation obs = CollectObservations();
         Vector2<float> action = RequestAction(obs);
         OnActionReceived(action, deltaTime);

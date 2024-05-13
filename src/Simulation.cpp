@@ -120,9 +120,6 @@ namespace Ecosim
 
             renderables.emplace_back(ptr);
             collidables.emplace_back(ptr);
-
-            Statistics::Report("Food_X", f.getPosition().x);
-            Statistics::Report("Food_Y", f.getPosition().y);
         }
 
         CollisionHandler::SetCollidables(collidables);
@@ -209,6 +206,48 @@ namespace Ecosim
             for (const auto &simulatable : simulatables)
                 simulatable->Step(deltaTime);
 
+            int numAgents = 0;
+
+            float averageSpeed = 0;
+            float averageStrength = 0;
+            float averageSearchRadius = 0;
+            float averageFear = 0;
+            float averageFoodAttraction = 0;
+            float averageMetabolism = 0;
+            float averageEnergyDepletionRate = 0;
+
+            for (const auto &agent : simulatables)
+            {
+                if (auto a = dynamic_cast<Agent *>(agent.get()))
+                {
+                    averageSpeed += a->GetDna().getSpeed();
+                    averageStrength += a->GetDna().getStrength();
+                    averageSearchRadius += a->GetDna().getSearchRadius();
+                    averageFear += a->GetDna().getFearWeight();
+                    averageFoodAttraction += a->GetDna().getHungerWeight();
+                    averageMetabolism += a->GetDna().getMetabolism();
+                    averageEnergyDepletionRate += a->GetDna().getEnergyDepletionRate();
+
+                    numAgents++;
+                }
+            }
+
+            averageSpeed /= numAgents;
+            averageStrength /= numAgents;
+            averageSearchRadius /= numAgents;
+            averageFear /= numAgents;
+            averageFoodAttraction /= numAgents;
+            averageMetabolism /= numAgents;
+            averageEnergyDepletionRate /= numAgents;
+
+            Statistics::Report("AverageSpeed", averageSpeed);
+            Statistics::Report("AverageStrength", averageStrength);
+            Statistics::Report("AverageSearchRadius", averageSearchRadius);
+            Statistics::Report("AverageFear", averageFear);
+            Statistics::Report("AverageFoodAttraction", averageFoodAttraction);
+            Statistics::Report("AverageMetabolism", averageMetabolism);
+            Statistics::Report("AverageEnergyDepletionRate", averageEnergyDepletionRate);
+
             if (!limitDisplay || thisFrame - lastDisplayed >= displayInterval)
             {
                 lastDisplayed = thisFrame;
@@ -238,47 +277,7 @@ namespace Ecosim
 
         Map::Cleanup();
 
-        // int numAgents = 0;
-
-        // float averageSpeed = 0;
-        // float averageStrength = 0;
-        // float averageSearchRadius = 0;
-        // float averageFear = 0;
-        // float averageFoodAttraction = 0;
-        // float averageMetabolism = 0;
-        // float averageEnergyDepletionRate = 0;
-
-        // for (const auto &agent : simulatables)
-        // {
-        //     if (auto a = dynamic_cast<Agent *>(agent.get()))
-        //     {
-        //         averageSpeed += a->GetDna().getSpeed();
-        //         averageStrength += a->GetDna().getStrength();
-        //         averageSearchRadius += a->GetDna().getSearchRadius();
-        //         averageFear += a->GetDna().getFearWeight();
-        //         averageFoodAttraction += a->GetDna().getHungerWeight();
-        //         averageMetabolism += a->GetDna().getMetabolism();
-        //         averageEnergyDepletionRate += a->GetDna().getEnergyDepletionRate();
-
-        //         numAgents++;
-        //     }
-        // }
-
-        // averageSpeed /= numAgents;
-        // averageStrength /= numAgents;
-        // averageSearchRadius /= numAgents;
-        // averageFear /= numAgents;
-        // averageFoodAttraction /= numAgents;
-        // averageMetabolism /= numAgents;
-        // averageEnergyDepletionRate /= numAgents;
-
-        // Statistics::Report("AverageSpeed", averageSpeed);
-        // Statistics::Report("AverageStrength", averageStrength);
-        // Statistics::Report("AverageSearchRadius", averageSearchRadius);
-        // Statistics::Report("AverageFear", averageFear);
-        // Statistics::Report("AverageFoodAttraction", averageFoodAttraction);
-        // Statistics::Report("AverageMetabolism", averageMetabolism);
-        // Statistics::Report("AverageEnergyDepletionRate", averageEnergyDepletionRate);
+        Statistics::Export("Data");
 
         if (m_config.storeData)
         {
