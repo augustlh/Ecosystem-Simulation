@@ -14,6 +14,10 @@ set(LIB_SOURCES
     "src/Renderer.cpp"
     "src/Simulation.cpp"
     "src/Window.cpp"
+    "src/Agent.cpp"
+    "src/CollisionHandler.cpp"
+    "src/QuadTree.cpp"
+    "src/Food.cpp"
 )
 
 set(HEADERS
@@ -27,6 +31,11 @@ set(HEADERS
     "include/Statistics.h"
     "include/Vector2.h"
     "include/Window.h"
+    "include/Agent.h"
+    "include/CollisionHandler.h"
+    "include/QuadTree.h"
+    "include/Food.h"
+    "include/DNA.h"
 )
 
 add_library(EcosimLib SHARED ${LIB_SOURCES} ${HEADERS})

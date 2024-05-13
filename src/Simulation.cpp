@@ -5,6 +5,9 @@
 #include "Interfaces.h"
 #include "Map.h"
 #include "Camera.h"
+#include "Agent.h"
+#include "CollisionHandler.h"
+#include "Food.h"
 
 #include <MiniYaml/Yaml.hpp>
 
@@ -12,7 +15,6 @@
 #include <vector>
 #include <memory>
 
-#include "Removeme_AgentStuff.h"
 #include "Statistics.h"
 
 void HandleKeyRelease(SDL_KeyboardEvent &keyEvent)
@@ -57,8 +59,8 @@ namespace Ecosim
         ECOSIM_CATCH_AND_CALL(std::exception & e, SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to open and read yaml source: '%s'\n%s", configPath, e.what()))
 
         name = root["simulation-name"].As<std::string>("Unnamed simulation");
-        numAgents = root["num-agents"].As<uint>(100);
-        numFood = root["total-food"].As<uint>(100);
+        numAgents = root["num-agents"].As<uint>(200);
+        numFood = root["total-food"].As<uint>(200);
         enviromentConfigPath = root["enviroment"].As<std::string>("<no enviroment>");
         numSeconds = root["num-seconds"].As<uint>(0);
         storeData = root["store-data"].As<bool>(false);
@@ -95,29 +97,32 @@ namespace Ecosim
 
         std::vector<std::shared_ptr<Renderable>> renderables;
         std::vector<std::shared_ptr<Simulatable>> simulatables;
+        std::vector<std::shared_ptr<Collidable>> collidables;
 
         Statistics::Initialize();
 
         for (int i = 0; i < m_config.numAgents; ++i)
         {
-            Temp::Agent a{};
-            std::shared_ptr<Temp::Agent> ptr = std::make_shared<Temp::Agent>(a);
+            Agent a{};
+            std::shared_ptr<Agent> ptr = std::make_shared<Agent>(a);
+
+            ptr->SetId(i);
 
             renderables.emplace_back(ptr);
             simulatables.emplace_back(ptr);
+            collidables.emplace_back(ptr);
         }
 
         for (int i = 0; i < m_config.numFood; ++i)
         {
-            Temp::Food f{};
-            renderables.emplace_back(std::make_shared<Temp::Food>(f));
+            Food f{};
+            std::shared_ptr<Food> ptr = std::make_shared<Food>(f);
 
-            Statistics::Report("Food_X", f.pos.x);
-            Statistics::Report("Food_Y", f.pos.y);
-
-            // if (Statistics::MemorySize() >= 200)
-            //     Statistics::Export("FoodData");
+            renderables.emplace_back(ptr);
+            collidables.emplace_back(ptr);
         }
+
+        CollisionHandler::SetCollidables(collidables);
 
         while (!shouldClose)
         {
@@ -142,8 +147,106 @@ namespace Ecosim
 
             double deltaTime = (thisFrame - lastFrame) * 0.001;
 
+            std::vector<std::shared_ptr<Agent>> newAgents;
+
+            /* Scuffed isDead*/
+            auto agentIter = simulatables.begin();
+            while (agentIter != simulatables.end())
+            {
+                if (auto agent = dynamic_cast<Agent *>(agentIter->get()))
+                {
+                    if (agent->wantsToReproduce)
+                    {
+                        agent->Reproduce();
+
+                        Agent a{};
+                        std::shared_ptr<Agent> ptr = std::make_shared<Agent>(a);
+
+                        ptr->SetId(agent->GetId());
+                        ptr->SetDna(agent->MutateDNA());
+                        ptr->SetColor(agent->GetColor());
+                        ptr->SetPosition(agent->getPosition() + Vector2<float>(10, rand() % 20 - 10));
+                        newAgents.emplace_back(ptr);
+                    }
+
+                    if (agent->isDead)
+                    {
+                        agentIter = simulatables.erase(agentIter);
+
+                        auto renderableIter = std::find_if(renderables.begin(), renderables.end(),
+                                                           [&](const auto &renderable)
+                                                           { return renderable.get() == agent; });
+                        if (renderableIter != renderables.end())
+                            renderables.erase(renderableIter);
+                        auto collidableIter = std::find_if(collidables.begin(), collidables.end(),
+                                                           [&](const auto &collidable)
+                                                           { return collidable.get() == agent; });
+                        if (collidableIter != collidables.end())
+                            collidables.erase(collidableIter);
+                    }
+                    else
+                    {
+                        ++agentIter;
+                    }
+                }
+                else
+                {
+                    ++agentIter;
+                }
+            }
+            /* Scuffed isDead*/
+
+            for (const auto &agent : newAgents)
+            {
+                renderables.emplace_back(agent);
+                simulatables.emplace_back(agent);
+                collidables.emplace_back(agent);
+            }
+
             for (const auto &simulatable : simulatables)
                 simulatable->Step(deltaTime);
+
+            int numAgents = 0;
+
+            float averageSpeed = 0;
+            float averageStrength = 0;
+            float averageSearchRadius = 0;
+            float averageFear = 0;
+            float averageFoodAttraction = 0;
+            float averageMetabolism = 0;
+            float averageEnergyDepletionRate = 0;
+
+            for (const auto &agent : simulatables)
+            {
+                if (auto a = dynamic_cast<Agent *>(agent.get()))
+                {
+                    averageSpeed += a->GetDna().getSpeed();
+                    averageStrength += a->GetDna().getStrength();
+                    averageSearchRadius += a->GetDna().getSearchRadius();
+                    averageFear += a->GetDna().getFearWeight();
+                    averageFoodAttraction += a->GetDna().getHungerWeight();
+                    averageMetabolism += a->GetDna().getMetabolism();
+                    averageEnergyDepletionRate += a->GetDna().getEnergyDepletionRate();
+
+                    numAgents++;
+                }
+            }
+
+            averageSpeed /= numAgents;
+            averageStrength /= numAgents;
+            averageSearchRadius /= numAgents;
+            averageFear /= numAgents;
+            averageFoodAttraction /= numAgents;
+            averageMetabolism /= numAgents;
+            averageEnergyDepletionRate /= numAgents;
+
+            Statistics::Report("AverageSpeed", averageSpeed);
+            Statistics::Report("AverageStrength", averageStrength);
+            Statistics::Report("AverageSearchRadius", averageSearchRadius);
+            Statistics::Report("AverageFear", averageFear);
+            Statistics::Report("AverageFoodAttraction", averageFoodAttraction);
+            Statistics::Report("AverageMetabolism", averageMetabolism);
+            Statistics::Report("AverageEnergyDepletionRate", averageEnergyDepletionRate);
 
             if (!limitDisplay || thisFrame - lastDisplayed >= displayInterval)
             {
@@ -162,13 +265,23 @@ namespace Ecosim
                 for (const auto &renderable : renderables)
                     renderable->Draw();
 
+                // CollisionHandler::Render();
+
                 Renderer::RenderFrame();
             }
+
+            // CollisionHandler::SetCollidables(collidables);
+            CollisionHandler::Rebuild();
+            CollisionHandler::CheckCollisions();
         }
 
         Map::Cleanup();
 
+        Statistics::Export("Data");
+
         if (m_config.storeData)
-            Statistics::Export("FoodData");
+        {
+            // Statistics::Export("FoodData");
+        }
     }
 }

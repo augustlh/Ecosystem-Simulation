@@ -40,6 +40,22 @@ namespace Ecosim
         /// @return The magnitude of the vector
         float Magnitude() const { return std::sqrt(x * x + y * y); }
 
+        /// @return The square magnitude of the vector
+        float SquareMagnitude() const { return (x * x + y * y); }
+
+        /// @brief Normalize the vector
+        /// @return A reference to this vector
+        Vector2<T> &Normalize()
+        {
+            float mag = Magnitude();
+            if (mag > 0)
+            {
+                x /= mag;
+                y /= mag;
+            }
+            return *this;
+        }
+
         /// @brief Returns a copy of this vector
         /// @return The copy
         Vector2<T> Copy() { return Vector2<T>(x, y); }
