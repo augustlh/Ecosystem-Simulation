@@ -46,9 +46,7 @@ The following fields are valid, but not necessary (default values will be set if
 `biomes`: A list of biome types, where each type is a dictionaries with the following fields:\
    `name`: The name of the biome type\
    `color`: The color of the biome type specifed as such: `#rrggbb`\
-   `probability`: The probability of a random biome being of this type\
-   `visibility`: ... FIXME:\
-   `temperature`: ... FIXME:
+   `probability`: The probability of a random biome being of this type
 
 ## 4. Data visualization
 

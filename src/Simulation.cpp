@@ -133,7 +133,7 @@ namespace Ecosim
                 case SDL_EVENT_QUIT:
                     shouldClose = true;
                     break;
-                case SDL_EVENT_KEY_UP: // FIXME:
+                case SDL_EVENT_KEY_UP:
                     HandleKeyRelease(sdlEvent.key);
                     break;
                 }
@@ -255,17 +255,8 @@ namespace Ecosim
                 Renderer::Background(Color(51, 77, 102));
                 Map::Render();
 
-                // float mouseX, mouseY;
-                // SDL_GetMouseState(&mouseX, &mouseY);
-                // Vector2<int> coord = Camera::ViewportToWorld(Vector2<int>(mouseX, mouseY));
-                // bool water = Map::WaterAt(coord);
-                // BiomeType biome = Map::BiomeAt(coord);
-                // std::cout << "Mouse hovers over: water=" << water << ", biome=" << biome.name << ", coord=" << coord.x << "," << coord.y << std::endl;
-
                 for (const auto &renderable : renderables)
                     renderable->Draw();
-
-                // CollisionHandler::Render();
 
                 Renderer::RenderFrame();
             }
@@ -276,11 +267,7 @@ namespace Ecosim
 
         Map::Cleanup();
 
-        Statistics::Export("Data");
-
         if (m_config.storeData)
-        {
-            // Statistics::Export("FoodData");
-        }
+            Statistics::Export("Data");
     }
 }
