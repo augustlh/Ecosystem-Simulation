@@ -11,6 +11,7 @@
 
 namespace Ecosim
 {
+    /// @brief A class representing a node. The node is a square with a position and a width i.e. its used to represent a boundary in the quadtree.
     class Node
     {
     private:
@@ -49,24 +50,28 @@ namespace Ecosim
         Vector2<float> GetPos() { return m_Pos; }
     };
 
+    /// @brief A class representing a quadtree. The quadtree is used for collision detection in the simulation.
     class QuadTree
     {
     private:
         /// @brief The maximum number of collidables in a node before it subdivides
         const int capacity = 4;
 
-        /// @brief  The boundary of the node
+        /// @brief  The boundary node of the quadtree
         Node m_Boundary;
 
-        /// @brief The collidables in the node
+        /// @brief The collidables/objects in the QuadTree
         std::vector<std::shared_ptr<Collidable>> m_Collidables;
 
-        /// @brief The children of the node. The children are stored in the following order: top-left, top-right, bottom-left, bottom-right.
+        /// @brief The children of the QuadTree. The children are stored in the following order: top-left, top-right, bottom-left, bottom-right.
         std::vector<std::unique_ptr<QuadTree>> m_Children;
 
     public:
         /// @brief Construct a new QuadTree object
+        /// @param _boundary The boundary node of the quadtree
         QuadTree(Node &_boundary) : m_Boundary(_boundary), m_Children(4) {}
+
+        /// @brief Default destructor
         ~QuadTree() = default;
 
         /// @brief Insert a collidable into the quadtree

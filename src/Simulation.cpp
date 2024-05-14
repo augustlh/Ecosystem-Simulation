@@ -17,6 +17,8 @@
 
 #include "Statistics.h"
 
+bool renderQuadtree = false;
+
 void HandleKeyRelease(SDL_KeyboardEvent &keyEvent)
 {
     Ecosim::Vector2<float> move{};
@@ -39,6 +41,10 @@ void HandleKeyRelease(SDL_KeyboardEvent &keyEvent)
         break;
     case SDLK_x:
         Ecosim::Camera::Zoom(-0.2f);
+        break;
+
+    case SDLK_q:
+        renderQuadtree = !renderQuadtree;
         break;
     }
     Ecosim::Camera::MovePosition(move);
@@ -257,6 +263,9 @@ namespace Ecosim
 
                 for (const auto &renderable : renderables)
                     renderable->Draw();
+
+                if (renderQuadtree)
+                    CollisionHandler::Render();
 
                 Renderer::RenderFrame();
             }
