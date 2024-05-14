@@ -8,8 +8,14 @@ Where `config.yaml` is a path to a valid simulation config file (see section 3.1
 
 ## 2. Compiling Ecosim
 
+Install SDL3 in the external directory as such:
+
+`cd external`\
+`git clone https://github.com/libsdl-org/SDL.git`
+
 Create a build directory in the root directory:
 
+`cd ..`\
 `mkdir build`\
 `cd build`
 
